@@ -1,0 +1,76 @@
+================================================================================
+QUICK START: generate_vitaldb_training_data.py
+================================================================================
+
+STEP 1: Activate Environment
+----------------------------
+cd C:\IITM\vitalDB
+venv\Scripts\activate
+
+
+STEP 2: Run for Single Case
+----------------------------
+python generate_vitaldb_training_data.py --case_id 1 --track SNUADC/PLETH --glucose 95.0
+
+
+STEP 3: Check Output
+-------------------
+ls training_data\
+# Should see:
+#   ppg_windows.csv
+#   glucose_labels.csv
+
+
+STEP 4: Train Model
+-------------------
+python -m src.training.train_glucose_predictor --data_dir training_data
+
+
+================================================================================
+COMMON COMMANDS
+================================================================================
+
+# Manual glucose value
+python generate_vitaldb_training_data.py --case_id 1 --track SNUADC/PLETH --glucose 100.0
+
+# Auto-extract glucose from clinical data
+python generate_vitaldb_training_data.py --case_id 1 --track SNUADC/PLETH --glucose auto
+
+# Custom output directory
+python generate_vitaldb_training_data.py --case_id 1 --track SNUADC/PLETH --glucose 95.0 --output my_data
+
+# Adjust quality filters (for more/fewer windows)
+python generate_vitaldb_training_data.py --case_id 1 --track SNUADC/PLETH --glucose 95.0 --similarity 0.75
+
+
+================================================================================
+TOP 50 CASE IDS (for batch processing)
+================================================================================
+813, 550, 2541, 3321, 4140, 1186, 5070, 4360, 3300, 1515, 3205, 1605, 4898,
+4412, 4251, 3390, 6337, 4647, 4686, 4760, 5907, 3380, 94, 4911, 3097, 6351,
+2318, 1995, 722, 2424, 2395, 4771, 3689, 1327, 5343, 1564, 4703, 870, 2494,
+2272, 5550, 2060, 5040, 2653, 5222, 2575, 1807, 4179, 876, 1793
+
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+Problem: "No valid windows extracted"
+Fix: Lower thresholds
+     python generate_vitaldb_training_data.py --case_id 1 --track SNUADC/PLETH --glucose 95.0 --height 0.2 --similarity 0.75
+
+Problem: "No clinical glucose available"
+Fix: Use manual value
+     python generate_vitaldb_training_data.py --case_id 1 --track SNUADC/PLETH --glucose 100.0
+
+Problem: "Track not found"
+Fix: Check available tracks in Python:
+     >>> import vitaldb
+     >>> vdb = vitaldb.VitalFile(1)
+     >>> print(vdb.get_track_names())
+
+
+================================================================================
+FULL DOCUMENTATION: HOW_TO_RUN_TRAINING_DATA_GENERATOR.md
+================================================================================

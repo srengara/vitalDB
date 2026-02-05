@@ -1,0 +1,51 @@
+How to Convert HTML to PDF
+================================================================================
+
+The status report has been converted to HTML: C:\IITM\vitalDB\STATUS_REPORT_M1.html
+
+To create a PDF, follow these simple steps:
+
+METHOD 1: Using Web Browser (Recommended)
+-----------------------------------------
+1. Open the HTML file in any web browser:
+   - Chrome, Firefox, Edge, or Safari
+   - Double-click the file, or
+   - Right-click → Open with → [Browser name]
+
+2. Print to PDF:
+   - Press Ctrl+P (Windows) or Cmd+P (Mac)
+   - Select "Save as PDF" or "Microsoft Print to PDF"
+   - Click "Save" or "Print"
+   - Choose location: C:\IITM\vitalDB\STATUS_REPORT_M1.pdf
+
+3. Adjust settings (optional):
+   - Margins: Default
+   - Scale: 100%
+   - Background graphics: Enabled (for colors)
+   - Headers and footers: Optional
+
+METHOD 2: Using Microsoft Edge
+-------------------------------
+1. Right-click the HTML file → Open with → Microsoft Edge
+2. Click the "..." menu (top right)
+3. Click "Print"
+4. Select "Save as PDF"
+5. Click "Save"
+
+METHOD 3: Using Chrome/Chromium
+--------------------------------
+1. Open HTML file in Chrome
+2. Press Ctrl+P
+3. Destination: "Save as PDF"
+4. Click "Save"
+
+METHOD 4: Install Python PDF Library (Advanced)
+------------------------------------------------
+To enable automatic PDF generation:
+
+    pip install weasyprint
+
+Then run:
+    python convert_md_to_pdf.py
+
+Generated: December 10, 2025 at 11:23 AM

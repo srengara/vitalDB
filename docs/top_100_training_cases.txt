@@ -1,0 +1,189 @@
+================================================================================
+TOP 100 CASE IDS FOR GLUCOSE PREDICTION TRAINING
+================================================================================
+Generated: December 12, 2025
+Source: VitalDB Physionet lab_data.csv analysis
+Selection Criteria: Widest glucose range (temporal variation), >= 3 measurements
+
+================================================================================
+CASE IDS (Python List Format)
+================================================================================
+
+[813, 550, 2541, 3321, 4140, 1186, 5070, 4360, 3300, 1515, 3205, 1605, 4898, 4412, 4251, 3390, 6337, 4647, 4686, 4760, 5907, 3380, 94, 4911, 3097, 6351, 2318, 1995, 722, 2424, 2395, 4771, 3689, 1327, 5343, 1564, 4703, 870, 2494, 2272, 5550, 2060, 5040, 2653, 5222, 2575, 1807, 4179, 876, 1793, 3775, 5621, 6089, 5613, 2324, 1502, 1885, 594, 464, 5875, 4326, 794, 3440, 5051, 5425, 1196, 4817, 3331, 603, 4835, 4913, 4206, 1320, 2242, 4144, 5753, 2078, 4009, 4744, 4655, 5698, 4644, 6265, 5884, 4101, 1785, 4282, 3531, 5166, 3912, 617, 4283, 406, 1341, 1668, 1231, 3066, 3625, 691, 847]
+
+================================================================================
+CASE IDS (Comma-Separated Format)
+================================================================================
+
+813,550,2541,3321,4140,1186,5070,4360,3300,1515,3205,1605,4898,4412,4251,3390,6337,4647,4686,4760,5907,3380,94,4911,3097,6351,2318,1995,722,2424,2395,4771,3689,1327,5343,1564,4703,870,2494,2272,5550,2060,5040,2653,5222,2575,1807,4179,876,1793,3775,5621,6089,5613,2324,1502,1885,594,464,5875,4326,794,3440,5051,5425,1196,4817,3331,603,4835,4913,4206,1320,2242,4144,5753,2078,4009,4744,4655,5698,4644,6265,5884,4101,1785,4282,3531,5166,3912,617,4283,406,1341,1668,1231,3066,3625,691,847
+
+================================================================================
+KEY STATISTICS
+================================================================================
+
+Total Cases:                    100
+Total Glucose Measurements:     3,204
+Average Measurements per Case:  32.0
+
+Glucose Range:
+  Minimum:                      15 mg/dL
+  Maximum:                      1,211 mg/dL
+  Coverage Span:                1,196 mg/dL
+
+Mean Glucose:                   135.3 mg/dL
+Median Glucose:                 121.0 mg/dL
+Std Deviation:                  60.3 mg/dL
+
+Estimated PPG Windows:          ~112,140 (at 70% peak detection success rate)
+
+================================================================================
+CLINICAL DISTRIBUTION
+================================================================================
+
+Hypoglycemia (<70 mg/dL):       87 measurements    (2.7%)
+Normal (70-100 mg/dL):          529 measurements   (16.5%)
+Prediabetes (100-125 mg/dL):    461 measurements   (14.4%)
+Diabetes (>125 mg/dL):          2,127 measurements (66.4%)
+
+================================================================================
+SELECTION METHODOLOGY
+================================================================================
+
+1. Data Source:
+   - VitalDB Physionet lab_data.csv
+   - Total available cases with glucose: 5,091
+   - Total glucose measurements: 35,358
+
+2. Filtering Criteria:
+   - Cases with >= 3 glucose measurements (ensures temporal variation)
+   - Qualified cases: 4,147 out of 5,091
+
+3. Ranking Method:
+   - Sorted by glucose range (max - min) in descending order
+   - Prioritizes cases with widest temporal glucose variation
+   - This ensures model learns from diverse glucose dynamics
+
+4. Selection:
+   - Top 100 cases from ranked list
+   - Provides excellent coverage across all clinical glucose ranges
+
+================================================================================
+TRAINING RECOMMENDATIONS
+================================================================================
+
+Recommended Starting Point:
+  - Start with top 30 cases for initial training
+  - Evaluate model performance
+  - Incrementally add more cases (10-20 at a time)
+  - Monitor validation metrics for each increment
+
+Expected Training Data Volume:
+  - Top 30 cases:  ~950 measurements  -> ~33,000 PPG windows
+  - Top 50 cases:  ~1,693 measurements -> ~59,000 PPG windows
+  - Top 100 cases: ~3,204 measurements -> ~112,000 PPG windows
+
+Training Strategy:
+  1. Implement stratified k-fold cross-validation (k=5 or k=10)
+  2. Stratify by glucose ranges to ensure balanced representation
+  3. Monitor per-range accuracy during training
+  4. Track metrics: MAE, RMSE, MAPE, R², Clarke Error Grid zones
+
+Target Performance Metrics:
+  - MAE: < 10 mg/dL
+  - MAPE: < 10%
+  - RMSE: < 15 mg/dL
+  - R²: > 0.90
+  - Clarke Zone A: > 90%
+  - Clarke Zones A+B: > 95%
+
+================================================================================
+TOP 20 CASES DETAIL (Highest Glucose Range)
+================================================================================
+
+Rank   Case ID    Count    Min (mg/dL)  Max (mg/dL)   Mean (mg/dL)  Range (mg/dL)
+--------------------------------------------------------------------------------
+1      813        15       12.0         1211.0        191.7         1199.0
+2      550        15       20.0         1126.0        176.3         1106.0
+3      2541       8        37.0         892.0         232.5         855.0
+4      3321       7        37.0         859.0         222.9         822.0
+5      4140       7        52.0         785.0         270.3         733.0
+6      1186       8        37.0         753.0         193.5         716.0
+7      5070       6        34.0         741.0         232.5         707.0
+8      4360       7        46.0         697.0         275.0         651.0
+9      3300       4        58.0         694.0         279.5         636.0
+10     1515       11       51.0         684.0         216.5         633.0
+11     3205       7        44.0         673.0         262.0         629.0
+12     1605       5        72.0         696.0         344.2         624.0
+13     4898       5        66.0         681.0         374.4         615.0
+14     4412       8        45.0         656.0         263.9         611.0
+15     4251       4        86.0         687.0         383.0         601.0
+16     3390       6        41.0         639.0         243.3         598.0
+17     6337       5        72.0         665.0         327.8         593.0
+18     4647       5        77.0         663.0         316.6         586.0
+19     4686       5        82.0         660.0         328.4         578.0
+20     4760       4        80.0         652.0         385.8         572.0
+
+================================================================================
+USAGE INSTRUCTIONS
+================================================================================
+
+For Python/Pandas:
+------------------
+import pandas as pd
+
+case_ids = [813, 550, 2541, 3321, 4140, 1186, 5070, 4360, 3300, 1515,
+            3205, 1605, 4898, 4412, 4251, 3390, 6337, 4647, 4686, 4760,
+            5907, 3380, 94, 4911, 3097, 6351, 2318, 1995, 722, 2424,
+            2395, 4771, 3689, 1327, 5343, 1564, 4703, 870, 2494, 2272,
+            5550, 2060, 5040, 2653, 5222, 2575, 1807, 4179, 876, 1793,
+            3775, 5621, 6089, 5613, 2324, 1502, 1885, 594, 464, 5875,
+            4326, 794, 3440, 5051, 5425, 1196, 4817, 3331, 603, 4835,
+            4913, 4206, 1320, 2242, 4144, 5753, 2078, 4009, 4744, 4655,
+            5698, 4644, 6265, 5884, 4101, 1785, 4282, 3531, 5166, 3912,
+            617, 4283, 406, 1341, 1668, 1231, 3066, 3625, 691, 847]
+
+# Load data
+df = pd.read_csv('lab_data.csv')
+
+# Filter for training cases
+training_data = df[df['caseid'].isin(case_ids)]
+
+# Filter for glucose measurements
+glucose_training = training_data[training_data['name'] == 'gluc']
+
+print(f"Training samples: {len(glucose_training)}")
+print(f"Glucose range: {glucose_training['result'].min():.1f} - {glucose_training['result'].max():.1f} mg/dL")
+
+For SQL Query:
+--------------
+SELECT * FROM lab_data
+WHERE caseid IN (813,550,2541,3321,4140,1186,5070,4360,3300,1515,3205,1605,4898,4412,4251,3390,6337,4647,4686,4760,5907,3380,94,4911,3097,6351,2318,1995,722,2424,2395,4771,3689,1327,5343,1564,4703,870,2494,2272,5550,2060,5040,2653,5222,2575,1807,4179,876,1793,3775,5621,6089,5613,2324,1502,1885,594,464,5875,4326,794,3440,5051,5425,1196,4817,3331,603,4835,4913,4206,1320,2242,4144,5753,2078,4009,4744,4655,5698,4644,6265,5884,4101,1785,4282,3531,5166,3912,617,4283,406,1341,1668,1231,3066,3625,691,847)
+AND name = 'gluc';
+
+================================================================================
+RELATED FILES
+================================================================================
+
+Analysis Script:        get_top_50_cases.py
+Glucose Coverage Report: glucose_distribution_report.html
+Detailed Analysis:      analyze_glucose_coverage.py
+
+To regenerate this list with different N:
+  python get_top_50_cases.py -n 100
+
+================================================================================
+NOTES
+================================================================================
+
+1. These case IDs are ranked by glucose range (temporal variation)
+2. All cases have >= 3 glucose measurements for temporal analysis
+3. Distribution heavily skews toward diabetes range (66.4%) - representative
+   of typical ICU/hospital population
+4. Excellent coverage from hypoglycemia (15 mg/dL) to severe hyperglycemia
+   (1,211 mg/dL)
+5. Recommended to start with subset (top 30-50 cases) and expand incrementally
+6. Use stratified cross-validation to ensure balanced glucose range representation
+
+================================================================================
+END OF FILE
+================================================================================

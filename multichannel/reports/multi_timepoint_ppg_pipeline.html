@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Timepoint PPG-Glucose Sampling Pipeline</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 25px;
+            border-left: 4px solid #3498db;
+            padding-left: 10px;
+        }
+        h3 {
+            color: #7f8c8d;
+            margin-top: 20px;
+        }
+        .step {
+            background-color: #ecf0f1;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+        .step-header {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+        .file-box {
+            background-color: #fff;
+            border: 1px solid #bdc3c7;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .input-file {
+            border-left: 3px solid #e74c3c;
+        }
+        .output-file {
+            border-left: 3px solid #27ae60;
+        }
+        .label {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .input-label {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .output-label {
+            background-color: #27ae60;
+            color: white;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #bdc3c7;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #ecf0f1;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+            margin: 15px 0;
+        }
+        .advantage {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        code {
+            background-color: #ecf0f1;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        ul {
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Multi-Timepoint PPG-Glucose Sampling Pipeline</h1>
+
+        <h2>Overview</h2>
+        <p>
+            This pipeline processes VitalDB physiological data to extract multiple PPG-glucose paired samples per case,
+            enabling training on temporal glucose variations rather than assuming constant glucose values throughout a case.
+        </p>
+
+        <div class="highlight">
+            <strong>Key Innovation:</strong> Instead of using one glucose value per case, this approach extracts multiple
+            glucose measurements from lab results and creates corresponding PPG windows around each measurement timestamp,
+            capturing the temporal dynamics of glucose variation.
+        </div>
+
+        <h2>Pipeline Steps</h2>
+
+        <!-- Step 1 -->
+        <div class="step">
+            <div class="step-header">Step 1: Extract Glucose Timepoints from Lab Data</div>
+            <p><strong>Purpose:</strong> Identify all glucose measurements for a given case from laboratory results.</p>
+
+            <p><span class="label input-label">INPUT</span></p>
+            <div class="file-box input-file">labs.csv (PhysioNet dataset)</div>
+            <p style="margin-left: 20px; font-size: 0.95em;">
+                Contains: <code>caseid</code>, <code>charttime</code> (measurement timestamp),
+                <code>itemid</code> (lab test type), <code>value</code> (glucose value in mg/dL)
+            </p>
+
+            <p><span class="label output-label">OUTPUT</span></p>
+            <div class="file-box output-file">case_{id}_glucose_timepoints.csv</div>
+            <p style="margin-left: 20px; font-size: 0.95em;">
+                Columns: <code>measurement_id</code>, <code>timestamp</code>, <code>glucose_mg_dl</code>
+            </p>
+
+            <p><strong>Process:</strong></p>
+            <ul>
+                <li>Filter labs.csv for specific case ID</li>
+                <li>Filter for glucose-related itemid (e.g., itemid for blood glucose)</li>
+                <li>Extract charttime and glucose value for each measurement</li>
+                <li>Assign sequential measurement_id (0, 1, 2, ...)</li>
+            </ul>
+
+            <p><strong>Example:</strong></p>
+            <table>
+                <tr>
+                    <th>measurement_id</th>
+                    <th>timestamp</th>
+                    <th>glucose_mg_dl</th>
+                </tr>
+                <tr>
+                    <td>0</td>
+                    <td>2020-01-15 08:30:00</td>
+                    <td>134</td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>2020-01-15 14:45:00</td>
+                    <td>88</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>2020-01-15 20:15:00</td>
+                    <td>126</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step">
+            <div class="step-header">Step 2: Extract and Cleanse 16-Minute PPG Segments Around Each Glucose Measurement</div>
+            <p><strong>Purpose:</strong> For each glucose measurement, extract the corresponding PPG waveform data from ±8 minutes around the measurement timestamp, then immediately cleanse the raw data before any further processing.</p>
+
+            <p><span class="label input-label">INPUT</span></p>
+            <div class="file-box input-file">case_{id}_glucose_timepoints.csv (from Step 1)</div>
+            <div class="file-box input-file">case_{id}_raw_ppg.csv (VitalDB raw data)</div>
+            <p style="margin-left: 20px; font-size: 0.95em;">
+                Contains: <code>Time</code>, <code>SNUADC/PLETH</code> (PPG signal at 500 Hz)
+            </p>
+
+            <p><span class="label output-label">OUTPUT</span> (one file per glucose measurement)</p>
+            <div class="file-box output-file">case_{id}_ppg_segment_{measurement_id}_cleansed.csv</div>
+            <p style="margin-left: 20px; font-size: 0.95em;">
+                Columns: <code>time</code>, <code>ppg</code>, <code>glucose_mg_dl</code>, <code>glucose_timestamp</code>
+            </p>
+
+            <div class="highlight" style="margin-top: 15px; background-color: #fee; border-left-color: #e74c3c;">
+                <strong>⚠ CRITICAL: Cleansing Must Be First!</strong><br>
+                Raw data often contains missing timestamps, NaN values, duplicates, and out-of-order entries.
+                Cleansing MUST happen immediately after extraction, before any other processing, to prevent
+                downstream errors in filtering, peak detection, and window computation.
+            </div>
+
+            <p><strong>Process:</strong></p>
+            <ul>
+                <li><strong>Step 2.1 - Cleanse Raw PPG Data (MANDATORY FIRST STEP):</strong>
+                    <ul>
+                        <li>Load raw PPG data for the case</li>
+                        <li>Remove rows with missing time or PPG values (NaN, null)</li>
+                        <li>Remove duplicate timestamps (keep first occurrence)</li>
+                        <li>Sort data by time (ensure chronological order)</li>
+                        <li>Remove invalid signal values (inf, -inf, extreme outliers)</li>
+                        <li>Validate minimum data length (ensure sufficient samples for processing)</li>
+                        <li>Detect and warn about large time gaps in the series</li>
+                    </ul>
+                </li>
+                <li><strong>Step 2.2 - Extract 16-Minute Segments:</strong>
+                    <ul>
+                        <li>For each glucose measurement timestamp <code>t</code> from Step 1:</li>
+                        <li>Define window: [t - 8 minutes, t + 8 minutes]</li>
+                        <li>Extract all cleansed PPG samples within this 16-minute window</li>
+                        <li>Attach glucose value and timestamp as metadata</li>
+                    </ul>
+                </li>
+                <li><strong>Step 2.3 - Save Cleansed Segment:</strong>
+                    <ul>
+                        <li>Save cleansed segment as CSV file for downstream processing</li>
+                        <li>Log cleansing statistics (rows removed, duplicates, gaps detected)</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <p><strong>Example:</strong> For case 100 with 3 glucose measurements → 3 cleansed segment files:</p>
+            <ul style="font-family: 'Courier New', monospace; font-size: 0.9em;">
+                <li>case_100_ppg_segment_0_cleansed.csv (16 min around 08:30:00, glucose=134)</li>
+                <li>case_100_ppg_segment_1_cleansed.csv (16 min around 14:45:00, glucose=88)</li>
+                <li>case_100_ppg_segment_2_cleansed.csv (16 min around 20:15:00, glucose=126)</li>
+            </ul>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step">
+            <div class="step-header">Step 3: Process Each Cleansed PPG Segment Through Signal Processing Pipeline</div>
+            <p><strong>Purpose:</strong> Apply downsampling, preprocessing, peak detection, window extraction, and template-based deduplication to each cleansed 16-minute segment.</p>
+
+            <p><span class="label input-label">INPUT</span></p>
+            <div class="file-box input-file">case_{id}_ppg_segment_{measurement_id}_cleansed.csv (from Step 2)</div>
+            <p style="margin-left: 20px; font-size: 0.95em;">
+                <em>Note: Data is already cleansed (no NaN, no duplicates, sorted by time)</em>
+            </p>
+
+            <p><span class="label output-label">OUTPUT</span> (per measurement)</p>
+            <div class="file-box output-file">case_{id}_measurement_{measurement_id}_ppg_windows.csv</div>
+            <div class="file-box output-file">case_{id}_measurement_{measurement_id}_glucose_labels.csv</div>
+
+            <p><strong>Sub-Steps:</strong></p>
+            <ol>
+                <li><strong>Downsampling:</strong> Resample from 500 Hz → 100 Hz (scipy.signal.resample with anti-aliasing)</li>
+                <li><strong>Preprocessing:</strong>
+                    <ul>
+                        <li>Bandpass filter: 0.5-10 Hz (removes baseline drift and high-frequency noise)</li>
+                        <li>Savitzky-Golay smoothing: window=11, polynomial=3</li>
+                    </ul>
+                </li>
+                <li><strong>Peak Detection:</strong> Identify PPG peaks using adaptive thresholds based on signal statistics</li>
+                <li><strong>Window Extraction:</strong> Extract 1-second windows (100 samples @ 100 Hz) centered on each peak</li>
+                <li><strong>Template-Based Filtering:</strong> Remove duplicate/similar windows using cosine similarity ≥ 0.85</li>
+                <li><strong>Save Results:</strong>
+                    <ul>
+                        <li>ppg_windows.csv: Contains window_index, sample_index, amplitude</li>
+                        <li>glucose_labels.csv: Contains window_index, glucose_mg_dl (same glucose for all windows in this segment)</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <p><strong>Example Output:</strong> If segment yields 45 unique windows:</p>
+            <table>
+                <tr>
+                    <th colspan="3">ppg_windows.csv</th>
+                    <th colspan="2">glucose_labels.csv</th>
+                </tr>
+                <tr>
+                    <th>window_index</th>
+                    <th>sample_index</th>
+                    <th>amplitude</th>
+                    <th>window_index</th>
+                    <th>glucose_mg_dl</th>
+                </tr>
+                <tr>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0.234</td>
+                    <td>0</td>
+                    <td>134</td>
+                </tr>
+                <tr>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>0.245</td>
+                    <td>1</td>
+                    <td>134</td>
+                </tr>
+                <tr>
+                    <td>...</td>
+                    <td>...</td>
+                    <td>...</td>
+                    <td>...</td>
+                    <td>...</td>
+                </tr>
+                <tr>
+                    <td>44</td>
+                    <td>99</td>
+                    <td>0.189</td>
+                    <td>44</td>
+                    <td>134</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step">
+            <div class="step-header">Step 4: Merge All Measurements Per Case</div>
+            <p><strong>Purpose:</strong> Combine windows from all glucose measurements within a single case into unified files.</p>
+
+            <p><span class="label input-label">INPUT</span> (all measurements for case)</p>
+            <div class="file-box input-file">case_{id}_measurement_0_ppg_windows.csv + glucose_labels.csv</div>
+            <div class="file-box input-file">case_{id}_measurement_1_ppg_windows.csv + glucose_labels.csv</div>
+            <div class="file-box input-file">case_{id}_measurement_2_ppg_windows.csv + glucose_labels.csv</div>
+            <div class="file-box input-file">... (one pair per glucose measurement)</div>
+
+            <p><span class="label output-label">OUTPUT</span></p>
+            <div class="file-box output-file">case_{id}_merged_ppg_windows.csv</div>
+            <div class="file-box output-file">case_{id}_merged_glucose_labels.csv</div>
+
+            <p><strong>Process:</strong></p>
+            <ul>
+                <li>Load all measurement-specific ppg_windows.csv files for the case</li>
+                <li>Concatenate them vertically (row-wise)</li>
+                <li>Re-index window_index sequentially (0, 1, 2, ..., N-1)</li>
+                <li>Repeat for glucose_labels.csv files</li>
+                <li>Ensure window_index alignment between ppg_windows and glucose_labels</li>
+            </ul>
+
+            <p><strong>Example:</strong></p>
+            <p style="margin-left: 20px;">
+                If measurement_0 has 45 windows (glucose=134), measurement_1 has 52 windows (glucose=88),
+                measurement_2 has 48 windows (glucose=126):<br>
+                → Merged file contains 145 total windows with correct glucose labels for each
+            </p>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="step">
+            <div class="step-header">Step 5: Aggregate Across All Cases for Final Training Dataset</div>
+            <p><strong>Purpose:</strong> Combine per-case merged files from all cases into a single training dataset.</p>
+
+            <p><span class="label input-label">INPUT</span> (all cases)</p>
+            <div class="file-box input-file">case_100_merged_ppg_windows.csv + glucose_labels.csv</div>
+            <div class="file-box input-file">case_101_merged_ppg_windows.csv + glucose_labels.csv</div>
+            <div class="file-box input-file">case_102_merged_ppg_windows.csv + glucose_labels.csv</div>
+            <div class="file-box input-file">... (one pair per case)</div>
+
+            <p><span class="label output-label">FINAL OUTPUT</span></p>
+            <div class="file-box output-file" style="font-weight: bold; border: 2px solid #27ae60;">ppg_windows.csv (FINAL TRAINING DATA)</div>
+            <div class="file-box output-file" style="font-weight: bold; border: 2px solid #27ae60;">glucose_labels.csv (FINAL TRAINING LABELS)</div>
+
+            <p><strong>Process:</strong></p>
+            <ul>
+                <li>Load all case-level merged files</li>
+                <li>Concatenate all ppg_windows.csv files</li>
+                <li>Concatenate all glucose_labels.csv files</li>
+                <li>Re-index window_index globally (0, 1, 2, ..., M-1 where M = total windows across all cases)</li>
+                <li>Verify data integrity: same number of windows in both files</li>
+                <li>Save final training dataset</li>
+            </ul>
+
+            <p><strong>Example Final Dataset:</strong></p>
+            <p style="margin-left: 20px;">
+                If processing 10 cases with average 4 glucose measurements per case and 50 windows per measurement:<br>
+                → Final dataset: 10 cases × 4 measurements × 50 windows = <strong>2,000 training samples</strong><br>
+                (vs. 500 samples with single glucose value per case)
+            </p>
+        </div>
+
+        <h2>Data Flow Summary</h2>
+        <table>
+            <tr>
+                <th>Step</th>
+                <th>Scope</th>
+                <th>Input</th>
+                <th>Output</th>
+                <th>Key Operation</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>Per case</td>
+                <td>labs.csv</td>
+                <td>glucose_timepoints.csv</td>
+                <td>Extract glucose measurements</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Per measurement</td>
+                <td>glucose_timepoints + raw PPG</td>
+                <td>ppg_segment_{m}_cleansed.csv</td>
+                <td><strong>Extract + Cleanse</strong> (remove NaN, duplicates, sort)</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>Per measurement</td>
+                <td>ppg_segment_{m}_cleansed.csv</td>
+                <td>measurement_{m}_windows.csv + labels.csv</td>
+                <td>Downsample, filter, peak detect, deduplicate</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>Per case</td>
+                <td>All measurement files for case</td>
+                <td>case_{id}_merged files</td>
+                <td>Merge all measurements per case</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>Global</td>
+                <td>All case merged files</td>
+                <td>Final ppg_windows + glucose_labels</td>
+                <td>Aggregate all cases into training dataset</td>
+            </tr>
+        </table>
+
+        <h2>Key Advantages</h2>
+        <ul>
+            <li class="advantage">✓ Captures temporal glucose variation</li>
+            <p style="margin-left: 25px; margin-top: -10px; color: #555;">
+                Instead of assuming constant glucose throughout a case, this approach samples at multiple timepoints
+                when glucose was actually measured, capturing real physiological dynamics.
+            </p>
+
+            <li class="advantage">✓ Increases training data volume</li>
+            <p style="margin-left: 25px; margin-top: -10px; color: #555;">
+                Typical increase: 3-5× more samples per case (depending on lab measurement frequency).
+            </p>
+
+            <li class="advantage">✓ Improves label accuracy</li>
+            <p style="margin-left: 25px; margin-top: -10px; color: #555;">
+                PPG windows are paired with glucose values measured within ±8 minutes, ensuring temporal alignment
+                between signal and label.
+            </p>
+
+            <li class="advantage">✓ Enables better generalization</li>
+            <p style="margin-left: 25px; margin-top: -10px; color: #555;">
+                Training on diverse glucose levels from the same patient helps the model learn how PPG patterns
+                change with glucose variation, rather than patient-specific baseline differences.
+            </p>
+        </ul>
+
+        <h2>Technical Parameters</h2>
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Value</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>Glucose window</td>
+                <td>±8 minutes</td>
+                <td>Time range around glucose measurement for PPG extraction</td>
+            </tr>
+            <tr>
+                <td>Original sampling rate</td>
+                <td>500 Hz</td>
+                <td>VitalDB SNUADC/PLETH raw data rate</td>
+            </tr>
+            <tr>
+                <td>Target sampling rate</td>
+                <td>100 Hz</td>
+                <td>After downsampling (as per paper)</td>
+            </tr>
+            <tr>
+                <td>PPG window size</td>
+                <td>1 second (100 samples)</td>
+                <td>Window extracted around each detected peak</td>
+            </tr>
+            <tr>
+                <td>Bandpass filter</td>
+                <td>0.5 - 10 Hz</td>
+                <td>Removes baseline drift and noise</td>
+            </tr>
+            <tr>
+                <td>Template similarity threshold</td>
+                <td>0.85 (cosine)</td>
+                <td>For deduplication of similar windows</td>
+            </tr>
+        </table>
+
+        <div class="highlight">
+            <strong>Note on Normalization:</strong> During training, PPG data uses per-window z-score normalization
+            (axis=1, keepdims=True), while glucose uses global z-score normalization (mean and std computed across
+            all training samples). These normalization parameters (glucose_mean, glucose_std) must be saved and
+            reused during inference for proper denormalization.
+        </div>
+
+    </div>
+</body>
+</html>

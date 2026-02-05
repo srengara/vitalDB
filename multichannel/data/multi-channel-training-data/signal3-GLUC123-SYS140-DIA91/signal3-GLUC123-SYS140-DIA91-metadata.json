@@ -1,0 +1,27 @@
+{
+  "status": "SUCCESS",
+  "input_file": "C:\\senzrtech\\Multi-channel\\multi-channel-input-files\\signal3-GLUC123-SYS140-DIA91.csv",
+  "output_file": ".\\multi-channel-training-data\\signal3-GLUC123-SYS140-DIA91\\signal3-GLUC123-SYS140-DIA91-output.csv",
+  "metadata": {
+    "channel": "signal3",
+    "glucose": 123,
+    "systolic": 140,
+    "diastolic": 91,
+    "original_filename": "signal3-GLUC123-SYS140-DIA91.csv",
+    "inferred_sampling_rate": 999.9999999987779,
+    "expected_sampling_rate": 100.0,
+    "num_samples": 14992,
+    "duration_seconds": 14.991
+  },
+  "processing": {
+    "sampling_rate": 100.0,
+    "total_samples": 14992,
+    "duration_seconds": 14.991,
+    "peaks_detected": 12,
+    "windows_extracted": 12,
+    "windows_filtered": 9,
+    "filtering_rate": 75.0,
+    "final_output_rows": 9,
+    "data_quality": "pure"
+  }
+}

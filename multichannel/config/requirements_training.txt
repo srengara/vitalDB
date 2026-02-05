@@ -1,0 +1,24 @@
+"""
+requirements.txt - Python dependencies for multi-channel training
+"""
+
+# Core deep learning
+torch==2.1.2
+torchvision==0.16.2
+torchaudio==2.1.2
+
+# Data processing
+pandas==2.1.3
+numpy==1.24.3
+scikit-learn==1.3.2
+
+# Configuration and logging
+pyyaml==6.0.1
+
+# Visualization (optional)
+matplotlib==3.8.2
+tensorboard==2.15.1
+
+# Development (optional)
+jupyter==1.0.0
+ipython==8.18.1

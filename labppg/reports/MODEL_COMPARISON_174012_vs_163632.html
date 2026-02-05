@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lab PPG Model Comparison Report</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e8e8e8;
+            padding: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+        h2 {
+            color: #764ba2;
+            border-bottom: 2px solid #764ba2;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #bdc3c7;
+            margin-bottom: 30px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background: rgba(255,255,255,0.02);
+        }
+        tr:hover {
+            background: rgba(102,126,234,0.1);
+        }
+        .good { color: #2ecc71; font-weight: bold; }
+        .warn { color: #f39c12; font-weight: bold; }
+        .bad { color: #e74c3c; font-weight: bold; }
+        .better { background: rgba(46,204,113,0.2) !important; }
+        .metric-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+        .metric-card {
+            background: rgba(102,126,234,0.15);
+            border-radius: 15px;
+            padding: 25px 35px;
+            text-align: center;
+            min-width: 200px;
+            border: 1px solid rgba(102,126,234,0.3);
+        }
+        .metric-card.winner {
+            border: 2px solid #2ecc71;
+            box-shadow: 0 0 20px rgba(46,204,113,0.3);
+        }
+        .metric-label {
+            color: #bdc3c7;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        .metric-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .metric-model {
+            font-size: 0.85em;
+            color: #95a5a6;
+            margin-top: 5px;
+        }
+        .comparison-row {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        .model-box {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 20px;
+            width: 45%;
+            text-align: center;
+        }
+        .model-box h3 {
+            color: #667eea;
+            margin-top: 0;
+        }
+        .insight-box {
+            background: linear-gradient(135deg, rgba(102,126,234,0.1) 0%, rgba(118,75,162,0.1) 100%);
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+        .insight-box h3 {
+            color: #667eea;
+            margin-top: 0;
+        }
+        .bar-container {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .bar-label {
+            width: 100px;
+            text-align: right;
+            padding-right: 10px;
+            font-size: 0.9em;
+        }
+        .bar-wrapper {
+            flex: 1;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            height: 25px;
+            position: relative;
+        }
+        .bar {
+            height: 100%;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        .bar-174012 {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+        .bar-163632 {
+            background: linear-gradient(90deg, #f39c12 0%, #e74c3c 100%);
+        }
+    </style>
+</head>
+<body>
+    <h1>Lab PPG Model Comparison Report</h1>
+    <p class="subtitle">Model 174012 vs Model 163632 | 8 Lab Samples</p>
+
+    <h2>Summary Metrics</h2>
+    <div class="metric-container">
+        <div class="metric-card winner">
+            <div class="metric-label">MAE (Model 174012)</div>
+            <div class="metric-value">32.4</div>
+            <div class="metric-model">mg/dL</div>
+        </div>
+        <div class="metric-card ">
+            <div class="metric-label">MAE (Model 163632)</div>
+            <div class="metric-value">65.5</div>
+            <div class="metric-model">mg/dL</div>
+        </div>
+    </div>
+
+    <div class="metric-container">
+        <div class="metric-card winner">
+            <div class="metric-label">MARD (Model 174012)</div>
+            <div class="metric-value">26.6%</div>
+            <div class="metric-model">Mean Abs Rel Diff</div>
+        </div>
+        <div class="metric-card ">
+            <div class="metric-label">MARD (Model 163632)</div>
+            <div class="metric-value">56.4%</div>
+            <div class="metric-model">Mean Abs Rel Diff</div>
+        </div>
+    </div>
+
+    <h2>Comparison Table</h2>
+    <table>
+        <tr>
+            <th>Metric</th>
+            <th>Model 174012</th>
+            <th>Model 163632</th>
+            <th>Better</th>
+            <th>Difference</th>
+        </tr>
+        <tr>
+            <td><b>MAE</b></td>
+            <td class="good">32.37 mg/dL</td>
+            <td class="">65.52 mg/dL</td>
+            <td class="good">174012</td>
+            <td>33.15 mg/dL</td>
+        </tr>
+        <tr>
+            <td><b>RMSE</b></td>
+            <td class="good">34.40 mg/dL</td>
+            <td class="">70.25 mg/dL</td>
+            <td class="good">174012</td>
+            <td>35.86 mg/dL</td>
+        </tr>
+        <tr>
+            <td><b>MARD</b></td>
+            <td class="good">26.65%</td>
+            <td class="">56.45%</td>
+            <td class="good">174012</td>
+            <td>29.80%</td>
+        </tr>
+        <tr>
+            <td><b>Max Error</b></td>
+            <td>50.24 mg/dL</td>
+            <td>101.57 mg/dL</td>
+            <td class="good">174012</td>
+            <td>51.32 mg/dL</td>
+        </tr>
+    </table>
+
+    <h2>Sample-wise Comparison</h2>
+    <table>
+        <tr>
+            <th>Sample</th>
+            <th>Reference</th>
+            <th>Model 174012</th>
+            <th>Error 174012</th>
+            <th>Model 163632</th>
+            <th>Error 163632</th>
+            <th>Better</th>
+        </tr>
+        <tr class="better">
+            <td><b>Sub1Sample1</b></td>
+            <td>98</td>
+            <td>136.3</td>
+            <td class="bad">+38.3</td>
+            <td>192.4</td>
+            <td class="bad">+94.4</td>
+            <td class="good">174012</td>
+        </tr>
+        <tr class="better">
+            <td><b>Sub1Sample2</b></td>
+            <td>98</td>
+            <td>136.3</td>
+            <td class="bad">+38.3</td>
+            <td>199.6</td>
+            <td class="bad">+101.6</td>
+            <td class="good">174012</td>
+        </tr>
+        <tr class="better">
+            <td><b>Sub1Sample3</b></td>
+            <td>158</td>
+            <td>145.9</td>
+            <td class="good">-12.1</td>
+            <td>234.7</td>
+            <td class="bad">+76.7</td>
+            <td class="good">174012</td>
+        </tr>
+        <tr class="better">
+            <td><b>Sub1Sample4</b></td>
+            <td>100</td>
+            <td>136.6</td>
+            <td class="bad">+36.6</td>
+            <td>175.2</td>
+            <td class="bad">+75.2</td>
+            <td class="good">174012</td>
+        </tr>
+        <tr class="better">
+            <td><b>Sub1Sample5</b></td>
+            <td>112</td>
+            <td>135.5</td>
+            <td class="warn">+23.5</td>
+            <td>174.0</td>
+            <td class="bad">+62.0</td>
+            <td class="good">174012</td>
+        </tr>
+        <tr class="">
+            <td><b>Sub2Sample1</b></td>
+            <td>148</td>
+            <td>168.7</td>
+            <td class="warn">+20.7</td>
+            <td>167.7</td>
+            <td class="warn">+19.7</td>
+            <td class="good">163632</td>
+        </tr>
+        <tr class="">
+            <td><b>Sub3Sample1</b></td>
+            <td>163</td>
+            <td>112.8</td>
+            <td class="bad">-50.2</td>
+            <td>207.9</td>
+            <td class="bad">+44.9</td>
+            <td class="good">163632</td>
+        </tr>
+        <tr class="better">
+            <td><b>Sub4Sample1</b></td>
+            <td>157</td>
+            <td>117.7</td>
+            <td class="bad">-39.3</td>
+            <td>206.7</td>
+            <td class="bad">+49.7</td>
+            <td class="good">174012</td>
+        </tr>
+    </table>
+
+    <h2>Visual Comparison: Error by Sample</h2>
+    <div style="margin: 20px 0;">
+        <div style="margin-bottom: 15px;">
+            <div style="font-weight: bold; margin-bottom: 5px;">Sub1Sample1 (Ref: 98 mg/dL)</div>
+            <div class="bar-container">
+                <div class="bar-label">174012</div>
+                <div class="bar-wrapper">
+                    <div class="bar bar-174012" style="width: 37.707241706080616%">38.3</div>
+                </div>
+            </div>
+            <div class="bar-container">
+                <div class="bar-label">163632</div>
+                <div class="bar-wrapper">
+                    <div class="bar bar-163632" style="width: 92.98958101477531%">94.4</div>
+                </div>
+            </div>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <div style="font-weight: bold; margin-bottom: 5px;">Sub1Sample2 (Ref: 98 mg/dL)</div>
+            <div class="bar-container">
+                <div class="bar-label">174012</div>
+                <div class="bar-wrapper">
+                    <div class="bar bar-174012" style="width: 37.75588447732071%">38.3</div>
+                </div>
+            </div>
+            <div class="bar-container">
+                <div class="bar-label">163632</div>
+                <div class="bar-wrapper">
+                    <div class="bar bar-163632" style="width: 100.0%">101.6</div>
+                </div>
+            </div>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <div style="font-weight: bold; margin-bottom: 5px;">Sub1Sample3 (Ref: 158 mg/dL)</div>
+            <div class="bar-container">
+                <div class="bar-label">174012</div>
+                <div class="bar-wrapper">
+                    <div class="bar bar-174012" style="width: 11.870375371060694%">12.1</div>
+                </div>
+            </div>
+            <div class="bar-container">
+                <div class="bar-label">163632</div>
+                <div class="bar-wrapper">
+                    <div class="bar bar-163632" style="width: 75.5008655055552%">76.7</div>
+                </div>
+            </div>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <div style="font-weight: bold; margin-bottom: 5px;">Sub1Sample4 (Ref: 100 mg/dL)</div>
+            <div class="bar-container">
+                <div class="bar-label">174012</div>
+                <div class="bar-wrapper">
+                    <div class="bar bar-174012" style="width: 35.989951774839845%">36.6</div>
+                </div>
+            </div>
+            <div class="bar-container">
+                <div class="bar-label">163632</div>
+                <div class="bar-wrapper">
+                    <div class="bar bar-163632" style="width: 73.99145573714841%">75.2</div>
+                </div>
+            </div>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <div style="font-weight: bold; margin-bottom: 5px;">Sub1Sample5 (Ref: 112 mg/dL)</div>
+            <div class="bar-container">
+                <div class="bar-label">174012</div>
+                <div class="bar-wrapper">
+                    <div class="bar bar-174012" style="width: 23.164794159583543%">23.5</div>
+                </div>
+            </div>
+            <div class="bar-container">
+                <div class="bar-label">163632</div>
+                <div class="bar-wrapper">
+                    <div class="bar bar-163632" style="width: 61.0590047056217%">62.0</div>
+                </div>
+            </div>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <div style="font-weight: bold; margin-bottom: 5px;">Sub2Sample1 (Ref: 148 mg/dL)</div>
+            <div class="bar-container">
+                <div class="bar-label">174012</div>
+                <div class="bar-wrapper">
+                    <div class="bar bar-174012" style="width: 20.34426038569296%">20.7</div>
+                </div>
+            </div>
+            <div class="bar-container">
+                <div class="bar-label">163632</div>
+                <div class="bar-wrapper">
+                    <div class="bar bar-163632" style="width: 19.424288162893678%">19.7</div>
+                </div>
+            </div>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <div style="font-weight: bold; margin-bottom: 5px;">Sub3Sample1 (Ref: 163 mg/dL)</div>
+            <div class="bar-container">
+                <div class="bar-label">174012</div>
+                <div class="bar-wrapper">
+                    <div class="bar bar-174012" style="width: 49.467574569727354%">50.2</div>
+                </div>
+            </div>
+            <div class="bar-container">
+                <div class="bar-label">163632</div>
+                <div class="bar-wrapper">
+                    <div class="bar bar-163632" style="width: 44.168881074188356%">44.9</div>
+                </div>
+            </div>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <div style="font-weight: bold; margin-bottom: 5px;">Sub4Sample1 (Ref: 157 mg/dL)</div>
+            <div class="bar-container">
+                <div class="bar-label">174012</div>
+                <div class="bar-wrapper">
+                    <div class="bar bar-174012" style="width: 38.64545711266842%">39.3</div>
+                </div>
+            </div>
+            <div class="bar-container">
+                <div class="bar-label">163632</div>
+                <div class="bar-wrapper">
+                    <div class="bar bar-163632" style="width: 48.94209062042879%">49.7</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2>Clinical Classification Accuracy</h2>
+    <table>
+        <tr>
+            <th>Sample</th>
+            <th>Reference Class</th>
+            <th>Model 174012 Class</th>
+            <th>Match 174012</th>
+            <th>Model 163632 Class</th>
+            <th>Match 163632</th>
+        </tr>
+        <tr>
+            <td>Sub1Sample1</td>
+            <td>Normal</td>
+            <td>Diabetic</td>
+            <td class="bad">No</td>
+            <td>Diabetic</td>
+            <td class="bad">No</td>
+        </tr>
+        <tr>
+            <td>Sub1Sample2</td>
+            <td>Normal</td>
+            <td>Diabetic</td>
+            <td class="bad">No</td>
+            <td>Diabetic</td>
+            <td class="bad">No</td>
+        </tr>
+        <tr>
+            <td>Sub1Sample3</td>
+            <td>Diabetic</td>
+            <td>Diabetic</td>
+            <td class="good">Yes</td>
+            <td>Diabetic</td>
+            <td class="good">Yes</td>
+        </tr>
+        <tr>
+            <td>Sub1Sample4</td>
+            <td>Prediabetes</td>
+            <td>Diabetic</td>
+            <td class="bad">No</td>
+            <td>Diabetic</td>
+            <td class="bad">No</td>
+        </tr>
+        <tr>
+            <td>Sub1Sample5</td>
+            <td>Prediabetes</td>
+            <td>Diabetic</td>
+            <td class="bad">No</td>
+            <td>Diabetic</td>
+            <td class="bad">No</td>
+        </tr>
+        <tr>
+            <td>Sub2Sample1</td>
+            <td>Diabetic</td>
+            <td>Diabetic</td>
+            <td class="good">Yes</td>
+            <td>Diabetic</td>
+            <td class="good">Yes</td>
+        </tr>
+        <tr>
+            <td>Sub3Sample1</td>
+            <td>Diabetic</td>
+            <td>Prediabetes</td>
+            <td class="bad">No</td>
+            <td>Diabetic</td>
+            <td class="good">Yes</td>
+        </tr>
+        <tr>
+            <td>Sub4Sample1</td>
+            <td>Diabetic</td>
+            <td>Prediabetes</td>
+            <td class="bad">No</td>
+            <td>Diabetic</td>
+            <td class="good">Yes</td>
+        </tr>
+        <tr style="background: rgba(102,126,234,0.2);">
+            <td colspan="2"><b>Classification Accuracy</b></td>
+            <td colspan="2" class="">2/8 (25.0%)</td>
+            <td colspan="2" class="good">4/8 (50.0%)</td>
+        </tr>
+    </table>
+
+    <h2>Key Insights</h2>
+    <div class="insight-box">
+        <h3>Model Performance Analysis</h3>
+        <ul>
+            <li><b>Overall Winner:</b> Model <span class="good">174012</span> has lower MAE (32.4 vs 65.5 mg/dL)</li>
+            <li><b>MAE Difference:</b> 33.2 mg/dL between models</li>
+            <li><b>MARD Difference:</b> 29.8% between models</li>
+            <li><b>Clinical Classification:</b> Model 174012 = 25%, Model 163632 = 50%</li>
+        </ul>
+    </div>
+
+    <div class="insight-box">
+        <h3>Prediction Behavior</h3>
+        <ul>
+            <li><b>Model 174012:</b> Mean prediction = 136.2 mg/dL (Range: 112.8 - 168.7)</li>
+            <li><b>Model 163632:</b> Mean prediction = 194.8 mg/dL (Range: 167.7 - 234.7)</li>
+            <li><b>Reference Range:</b> 98 - 163 mg/dL</li>
+        </ul>
+    </div>
+
+    <div class="insight-box">
+        <h3>Recommendations</h3>
+        <ul>
+            <li>Model 174012 shows better overall accuracy with -33.2 mg/dL lower MAE</li>
+            <li>Reference glucose spread: 65 mg/dL</li>
+            <li>Model 174012 prediction spread: 55.9 mg/dL</li>
+            <li>Model 163632 prediction spread: 67.0 mg/dL</li>
+            <li>Model 163632 shows more variation in predictions, which may indicate better feature learning</li>
+        </ul>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir \"C:\\\\IITM\\\\model\" /O-D /B)",
+      "Bash(powershell -Command:*)"
+    ]
+  }
+}

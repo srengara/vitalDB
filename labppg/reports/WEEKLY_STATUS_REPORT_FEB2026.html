@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Weekly Status Report - PPG-to-Glucose Project</title>
+    <style>
+        @page { size: A4; margin: 1.5cm; }
+        @media print {
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .page-break { page-break-before: always; }
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+            background: #fff;
+            color: #2c3e50;
+            padding: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.5;
+            font-size: 11pt;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24pt;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        .header h2 {
+            margin: 5px 0 0 0;
+            font-size: 14pt;
+            color: #7f8c8d;
+            font-weight: 400;
+        }
+        .header .date {
+            font-size: 10pt;
+            color: #95a5a6;
+            margin-top: 8px;
+        }
+        .tldr {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin-bottom: 25px;
+            font-size: 10pt;
+        }
+        .tldr strong { color: #fff; }
+        h2 {
+            color: #2c3e50;
+            font-size: 13pt;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 6px;
+            margin-top: 25px;
+            margin-bottom: 12px;
+        }
+        h3 {
+            color: #34495e;
+            font-size: 11pt;
+            margin-top: 15px;
+            margin-bottom: 8px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0 15px 0;
+            font-size: 10pt;
+        }
+        th, td {
+            padding: 8px 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background: #3498db;
+            color: white;
+            font-weight: 600;
+        }
+        tr:nth-child(even) { background: #f8f9fa; }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin: 15px 0;
+        }
+        .metric-card {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 12px;
+            text-align: center;
+        }
+        .metric-card .value {
+            font-size: 18pt;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        .metric-card .label {
+            font-size: 8pt;
+            color: #7f8c8d;
+            text-transform: uppercase;
+        }
+        .metric-card .status {
+            font-size: 8pt;
+            margin-top: 4px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        .status-progress { background: #fff3cd; color: #856404; }
+        .status-near { background: #d4edda; color: #155724; }
+        .status-done { background: #cce5ff; color: #004085; }
+        .highlights {
+            background: #f8f9fa;
+            padding: 12px 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        .highlights ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .highlights li { margin: 4px 0; }
+        .good { color: #27ae60; font-weight: 600; }
+        .warn { color: #f39c12; font-weight: 600; }
+        .bad { color: #e74c3c; font-weight: 600; }
+        .observation {
+            background: #fff3cd;
+            border-left: 4px solid #f39c12;
+            padding: 10px 15px;
+            margin: 12px 0;
+            font-size: 10pt;
+        }
+        .recommendation {
+            background: #d4edda;
+            border-left: 4px solid #27ae60;
+            padding: 10px 15px;
+            margin: 12px 0;
+            font-size: 10pt;
+        }
+        .critical {
+            background: #f8d7da;
+            border-left: 4px solid #e74c3c;
+            padding: 10px 15px;
+            margin: 12px 0;
+            font-size: 10pt;
+        }
+        .partner-box {
+            background: #e8f4fd;
+            border-left: 4px solid #3498db;
+            padding: 12px 15px;
+            margin: 12px 0;
+        }
+        .next-steps ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .next-steps li { margin: 5px 0; }
+        .footer {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+            font-size: 9pt;
+            color: #7f8c8d;
+            text-align: center;
+        }
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Weekly Status Report</h1>
+    <h2>PPG-to-Glucose Prediction Project</h2>
+    <div class="date">Week Ending: February 5, 2026</div>
+</div>
+
+<div class="tldr">
+    <strong>Executive Summary:</strong> Model 143853 achieves 26.1 mg/dL MAE with 94.2% clinical safety (Clarke A+B). Lab validation on 81 samples revealed BP as a key confound—filtering normotensive subjects improves MAE by 19%. Multi-channel pipeline operational. Kicked off Risk Assessment & FMEA engagement with Agrani Solutions.
+</div>
+
+<h2>1. Summary Dashboard</h2>
+
+<div class="dashboard-grid">
+    <div class="metric-card">
+        <div class="label">Model MAE</div>
+        <div class="value">26.1</div>
+        <div class="label">mg/dL (Target: <20)</div>
+        <div class="status status-progress">In Progress</div>
+    </div>
+    <div class="metric-card">
+        <div class="label">Clarke A+B</div>
+        <div class="value">94.2%</div>
+        <div class="label">Target: >95%</div>
+        <div class="status status-near">Near Target</div>
+    </div>
+    <div class="metric-card">
+        <div class="label">Lab Samples</div>
+        <div class="value">81</div>
+        <div class="label">Target: 150+</div>
+        <div class="status status-progress">Collecting</div>
+    </div>
+    <div class="metric-card">
+        <div class="label">Multi-Channel</div>
+        <div class="value">100%</div>
+        <div class="label">Pipeline Status</div>
+        <div class="status status-done">Complete</div>
+    </div>
+</div>
+
+<div class="highlights">
+    <strong>Key Highlights:</strong>
+    <ul>
+        <li>Completed BP-constrained analysis revealing cardiovascular confounds</li>
+        <li>Lab PPG validation underway with 81 samples across 8 subjects</li>
+        <li>Multi-channel (Red/IR PPG) pipeline fully operational</li>
+        <li>Model 143853 deployed as current production candidate</li>
+        <li><strong>Kicked off Risk Assessment & FMEA with Agrani Solutions</strong></li>
+    </ul>
+</div>
+
+<h2>2. Lab PPG Experiments</h2>
+
+<h3>2.1 Vanilla PPG Batch Testing</h3>
+<table>
+    <tr><th>Batch</th><th>Samples</th><th>Subjects</th><th>Channel</th><th>Status</th></tr>
+    <tr><td>Batch 1</td><td>42</td><td>Akshaya, Logesh, Mks, Rohan</td><td>Red & IR</td><td>Complete</td></tr>
+    <tr><td>Batch 2</td><td>39</td><td>Rohit, Pramod, Sudha, Vikraman</td><td>Red & IR</td><td>Complete</td></tr>
+    <tr><td><strong>Total</strong></td><td><strong>81</strong></td><td><strong>8 subjects</strong></td><td>-</td><td>-</td></tr>
+</table>
+
+<h3>2.2 Performance Summary</h3>
+<table>
+    <tr><th>Metric</th><th>Value</th><th>Assessment</th></tr>
+    <tr><td>MAE</td><td>30.6 mg/dL</td><td class="warn">Moderate</td></tr>
+    <tr><td>RMSE</td><td>40.9 mg/dL</td><td>-</td></tr>
+    <tr><td>MARD</td><td>27.9%</td><td class="warn">Needs Improvement</td></tr>
+    <tr><td>Clarke Zone A</td><td>53.8%</td><td class="bad">Below Target</td></tr>
+    <tr><td>Clarke Zone A+B</td><td>89.5%</td><td>Acceptable</td></tr>
+</table>
+
+<div class="observation">
+    <strong>Observation:</strong> Lab PPG shows higher error than VitalDB training data, indicating domain shift between clinical and controlled lab environments.
+</div>
+
+<h2>3. Blood Pressure Constraints Analysis</h2>
+
+<p>Hypertensive subjects exhibit altered PPG morphology due to vascular stiffness, potentially confounding glucose predictions.</p>
+
+<h3>3.1 Constraint Parameters</h3>
+<ul>
+    <li><strong>Systolic:</strong> ≤ 130 mmHg</li>
+    <li><strong>Diastolic:</strong> ≤ 90 mmHg</li>
+    <li><strong>Filtered Dataset:</strong> 46 of 81 samples (57%)</li>
+</ul>
+
+<h3>3.2 Results Comparison</h3>
+<table>
+    <tr><th>Metric</th><th>Unconstrained (n=81)</th><th>BP Constrained (n=46)</th><th>Delta</th></tr>
+    <tr><td>MAE</td><td>30.6 mg/dL</td><td class="good">24.8 mg/dL</td><td class="good">-19%</td></tr>
+    <tr><td>Clarke Zone A</td><td>53.8%</td><td class="good">63.0%</td><td class="good">+9.2pp</td></tr>
+    <tr><td>Clarke Zone A+B</td><td>89.5%</td><td class="good">93.5%</td><td class="good">+4.0pp</td></tr>
+</table>
+
+<h3>3.3 Key Finding</h3>
+<p><strong>BP is a significant confound.</strong> Correlation analysis:</p>
+<ul>
+    <li>Systolic BP correlation with error: <strong>+0.301</strong></li>
+    <li>Diastolic BP correlation with error: <strong>+0.235</strong></li>
+</ul>
+
+<div class="recommendation">
+    <strong>Recommendation:</strong> Consider BP as an input feature or develop BP-stratified models.
+</div>
+
+<div class="page-break"></div>
+
+<h2>4. Multi-Channel Training</h2>
+
+<h3>4.1 Pipeline Status</h3>
+<table>
+    <tr><th>Component</th><th>Red PPG (620-700nm)</th><th>IR PPG (870-920nm)</th></tr>
+    <tr><td>Data Collection</td><td>Complete</td><td>Complete</td></tr>
+    <tr><td>Preprocessing</td><td>Operational</td><td>Operational</td></tr>
+    <tr><td>Peak Detection</td><td>Calibrated</td><td>Calibrated</td></tr>
+    <tr><td>Inference</td><td>Deployed</td><td>Deployed</td></tr>
+</table>
+
+<h3>4.2 Channel Comparison</h3>
+<table>
+    <tr><th>Metric</th><th>Red PPG</th><th>IR PPG</th><th>Better</th></tr>
+    <tr><td>MAE</td><td>29.8 mg/dL</td><td>31.4 mg/dL</td><td class="good">Red</td></tr>
+    <tr><td>Success Rate</td><td>87%</td><td>91%</td><td class="good">IR</td></tr>
+    <tr><td>Signal Quality</td><td>Good</td><td>Excellent</td><td class="good">IR</td></tr>
+</table>
+
+<div class="observation">
+    <strong>Observation:</strong> Red PPG yields slightly better accuracy; IR PPG provides more robust signal acquisition. Production uses both channels with Red as primary.
+</div>
+
+<h2>5. Model Inference Report</h2>
+
+<h3>5.1 Latest Models Evaluated</h3>
+<table>
+    <tr><th>Model ID</th><th>Date</th><th>Architecture</th><th>Training Data</th></tr>
+    <tr><td><strong>143853</strong></td><td>Feb 2, 2026</td><td>ResNet34-1D</td><td>VitalDB 3,123 cases</td></tr>
+    <tr><td><strong>163632</strong></td><td>Jan 28, 2026</td><td>ResNet34-1D</td><td>VitalDB Extended</td></tr>
+</table>
+
+<h3>5.2 Model 143853 Performance</h3>
+<table>
+    <tr><th>Metric</th><th>VitalDB Test Set</th><th>Lab PPG Test</th></tr>
+    <tr><td>MAE</td><td>26.1 mg/dL</td><td>30.6 mg/dL</td></tr>
+    <tr><td>RMSE</td><td>35.2 mg/dL</td><td>40.9 mg/dL</td></tr>
+    <tr><td>Clarke A</td><td>55.1%</td><td>53.8%</td></tr>
+    <tr><td>Clarke A+B</td><td>94.2%</td><td>89.5%</td></tr>
+</table>
+
+<h3>5.3 Performance by Glucose Range</h3>
+<table>
+    <tr><th>Range</th><th>MAE</th><th>Assessment</th></tr>
+    <tr><td>Hypoglycemic (<70)</td><td>50.4 mg/dL</td><td class="bad">Poor</td></tr>
+    <tr><td>Normal (70-100)</td><td>17.2 mg/dL</td><td class="good">Good</td></tr>
+    <tr><td>High-Normal (100-140)</td><td>19.8 mg/dL</td><td class="good">Good</td></tr>
+    <tr><td>Prediabetes (140-180)</td><td>35.1 mg/dL</td><td class="warn">Moderate</td></tr>
+    <tr><td>Diabetic (≥180)</td><td>82.5 mg/dL</td><td class="bad">Poor</td></tr>
+</table>
+
+<div class="critical">
+    <strong>Critical Gap:</strong> Extreme glucose ranges show degraded performance due to data imbalance (only 1.5% hypoglycemic, 6.1% diabetic samples).
+</div>
+
+<h2>6. Next Steps</h2>
+
+<div class="two-col">
+    <div>
+        <h3>Immediate (Week of Feb 10)</h3>
+        <ol>
+            <li>Expand Lab PPG Dataset (target +50 samples)</li>
+            <li>BP Feature Integration experiment</li>
+            <li>Peak Detection Tuning (<5% failure)</li>
+        </ol>
+
+        <h3>Short-Term (February)</h3>
+        <ol start="4">
+            <li>Extreme Range Augmentation</li>
+            <li>Cross-Validation Study</li>
+            <li>IR Channel Optimization</li>
+        </ol>
+    </div>
+    <div>
+        <h3>Medium-Term (Q1 2026)</h3>
+        <ol start="7">
+            <li>Multi-Modal Fusion (Red + IR)</li>
+            <li>Transfer Learning on lab data</li>
+            <li>Clinical Pilot Preparation</li>
+        </ol>
+    </div>
+</div>
+
+<h2>7. Risk Assessment & FMEA Initiative</h2>
+
+<div class="partner-box">
+    <strong>Partner:</strong> Agrani Solutions<br>
+    <strong>Status:</strong> Kick-off completed this week
+</div>
+
+<p><strong>Scope:</strong></p>
+<ul>
+    <li>Failure Mode and Effects Analysis (FMEA) for PPG-glucose prediction system</li>
+    <li>Risk identification across data acquisition, signal processing, and model inference</li>
+    <li>Regulatory pathway assessment for medical device classification</li>
+</ul>
+
+<p><strong>Initial Focus Areas:</strong></p>
+<ul>
+    <li>Signal quality failures and mitigation strategies</li>
+    <li>Model confidence thresholds for clinical deployment</li>
+    <li>Patient safety boundaries for glucose alerts</li>
+</ul>
+
+<h2>8. Risks & Mitigations</h2>
+
+<table>
+    <tr><th>Risk</th><th>Impact</th><th>Mitigation</th></tr>
+    <tr><td>BP confounding</td><td class="bad">High</td><td>BP-stratified models or BP input feature</td></tr>
+    <tr><td>Data imbalance</td><td class="bad">High</td><td>Weighted sampling + synthetic augmentation</td></tr>
+    <tr><td>Domain shift</td><td class="warn">Medium</td><td>Transfer learning on lab data</td></tr>
+    <tr><td>Peak detection failures</td><td>Low</td><td>Relaxed filtering + fallback methods</td></tr>
+</table>
+
+<div class="footer">
+    <strong>Report Prepared By:</strong> PPG-Glucose Research Team |
+    <strong>Date:</strong> February 5, 2026 |
+    <strong>Next Review:</strong> February 12, 2026
+</div>
+
+</body>
+</html>

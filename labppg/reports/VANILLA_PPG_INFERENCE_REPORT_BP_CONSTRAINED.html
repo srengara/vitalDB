@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Vanilla PPG Inference Report (BP Constrained)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e27;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            color: white;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.2em;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+        .header .subtitle {
+            font-size: 0.9em;
+            opacity: 0.95;
+            margin-top: 8px;
+        }
+        h2 {
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+            margin-top: 40px;
+            font-size: 1.5em;
+            font-weight: 400;
+        }
+        h3 {
+            color: #aaa;
+            font-weight: 400;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-box {
+            background: #1e2139;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+        .stat-label {
+            font-size: 0.85em;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: 300;
+            color: #fff;
+        }
+        .good { color: #2ecc71; }
+        .warn { color: #f39c12; }
+        .bad { color: #e74c3c; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #141829;
+            margin: 20px 0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        th {
+            background: #1e2139;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #aaa;
+            border-bottom: 2px solid #667eea;
+        }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #1e2139;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tr:hover {
+            background: #1a1f35;
+        }
+        .left { text-align: left; }
+        .good { background: rgba(46, 204, 113, 0.1); }
+        .warn { background: rgba(243, 156, 18, 0.1); }
+        .bad { background: rgba(231, 76, 60, 0.1); }
+        .insight-box {
+            background: #1e2139;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 6px;
+        }
+        .insight-box h3 {
+            margin-top: 0;
+            color: #667eea;
+        }
+        .insight-box ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .insight-box li {
+            margin: 8px 0;
+        }
+        .constraint-notice {
+            background: #2c3e50;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 6px;
+            font-size: 0.95em;
+        }
+        svg {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Vanilla PPG Inference Report</h1>
+    <div class="subtitle">Blood Pressure Constrained Analysis (Systolic ≤ 130, Diastolic ≤ 90)</div>
+</div>
+
+<div class="constraint-notice">
+    <strong>Applied Constraints:</strong> This report includes only samples with Systolic pressure ≤ 130 mmHg AND Diastolic pressure ≤ 90 mmHg.
+    Original dataset: 81 samples → Filtered dataset: 46 samples
+</div>
+
+<!-- ===== OVERVIEW ===== -->
+<h2>1. Overview</h2>
+<div class="stats-grid">
+    <div class="stat-box">
+        <div class="stat-label">Total Samples</div>
+        <div class="stat-value">46</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">Successful</div>
+        <div class="stat-value">34</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">Failed</div>
+        <div class="stat-value">12</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">Subjects</div>
+        <div class="stat-value">5</div>
+    </div>
+</div>
+
+<!-- ===== PRIMARY METRICS ===== -->
+<h2>2. Primary Performance Metrics</h2>
+<div class="stats-grid">
+    <div class="stat-box">
+        <div class="stat-label">MAE (mg/dL)</div>
+        <div class="stat-value">23.28</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">RMSE (mg/dL)</div>
+        <div class="stat-value">29.87</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">MARD (%)</div>
+        <div class="stat-value">22.53%</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">Bias (mg/dL)</div>
+        <div class="stat-value warn">+17.72</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">R²</div>
+        <div class="stat-value">-1.718</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">Median AE</div>
+        <div class="stat-value">17.56</div>
+    </div>
+</div>
+
+<!-- ===== CLARKE ERROR GRID ===== -->
+<h2>3. Clarke Error Grid Analysis</h2>
+<svg width="560" height="560" xmlns="http://www.w3.org/2000/svg">
+<rect width="560" height="560" fill="#1a1a2e"/>
+<line x1="122.85714285714286" y1="60" x2="122.85714285714286" y2="500" stroke="#555" stroke-width="0.5" opacity="0.15"/>
+<line x1="60" y1="437.14285714285717" x2="500" y2="437.14285714285717" stroke="#555" stroke-width="0.5" opacity="0.15"/>
+<line x1="185.71428571428572" y1="60" x2="185.71428571428572" y2="500" stroke="#555" stroke-width="0.5" opacity="0.3"/>
+<line x1="60" y1="374.2857142857143" x2="500" y2="374.2857142857143" stroke="#555" stroke-width="0.5" opacity="0.3"/>
+<line x1="248.57142857142856" y1="60" x2="248.57142857142856" y2="500" stroke="#555" stroke-width="0.5" opacity="0.15"/>
+<line x1="60" y1="311.42857142857144" x2="500" y2="311.42857142857144" stroke="#555" stroke-width="0.5" opacity="0.15"/>
+<line x1="311.42857142857144" y1="60" x2="311.42857142857144" y2="500" stroke="#555" stroke-width="0.5" opacity="0.3"/>
+<line x1="60" y1="248.57142857142858" x2="500" y2="248.57142857142858" stroke="#555" stroke-width="0.5" opacity="0.3"/>
+<line x1="374.2857142857143" y1="60" x2="374.2857142857143" y2="500" stroke="#555" stroke-width="0.5" opacity="0.15"/>
+<line x1="60" y1="185.71428571428572" x2="500" y2="185.71428571428572" stroke="#555" stroke-width="0.5" opacity="0.15"/>
+<line x1="437.1428571428571" y1="60" x2="437.1428571428571" y2="500" stroke="#555" stroke-width="0.5" opacity="0.3"/>
+<line x1="60" y1="122.85714285714289" x2="500" y2="122.85714285714289" stroke="#555" stroke-width="0.5" opacity="0.3"/>
+<line x1="500.0" y1="60" x2="500.0" y2="500" stroke="#555" stroke-width="0.5" opacity="0.15"/>
+<line x1="60" y1="60.0" x2="500" y2="60.0" stroke="#555" stroke-width="0.5" opacity="0.15"/>
+<line x1="60" y1="500" x2="500" y2="500" stroke="#888" stroke-width="1.5"/>
+<line x1="60" y1="60" x2="60" y2="500" stroke="#888" stroke-width="1.5"/>
+<line x1="60.0" y1="500.0" x2="500.0" y2="60.0" stroke="#667eea" stroke-width="1.5" opacity="0.5" stroke-dasharray="8,4"/>
+<line x1="60.0" y1="474.85714285714283" x2="185.71428571428572" y2="349.1428571428571" stroke="#aaa" stroke-width="1" stroke-dasharray="5,3"/>
+<line x1="185.71428571428572" y1="349.1428571428571" x2="500.0" y2="60.0" stroke="#aaa" stroke-width="1" stroke-dasharray="5,3"/>
+<line x1="85.14285714285714" y1="500.0" x2="185.71428571428572" y2="399.42857142857144" stroke="#aaa" stroke-width="1" stroke-dasharray="5,3"/>
+<line x1="185.71428571428572" y1="399.42857142857144" x2="500.0" y2="148.0" stroke="#aaa" stroke-width="1" stroke-dasharray="5,3"/>
+<line x1="148.0" y1="60" x2="148.0" y2="500" stroke="#e74c3c" stroke-width="0.8" opacity="0.3" stroke-dasharray="5,4"/>
+<line x1="60" y1="412.0" x2="500" y2="412.0" stroke="#e74c3c" stroke-width="0.8" opacity="0.3" stroke-dasharray="5,4"/>
+<line x1="286.2857142857143" y1="60" x2="286.2857142857143" y2="500" stroke="#f39c12" stroke-width="0.8" opacity="0.3" stroke-dasharray="5,4"/>
+<line x1="60" y1="273.7142857142857" x2="500" y2="273.7142857142857" stroke="#f39c12" stroke-width="0.8" opacity="0.3" stroke-dasharray="5,4"/>
+<text x="236.0" y="324.0" font-size="30" fill="rgba(255,255,255,0.1)" font-weight="bold" font-family="Segoe UI">A</text>
+<text x="148.0" y="185.71428571428572" font-size="22" fill="rgba(255,255,255,0.08)" font-weight="bold" font-family="Segoe UI">B</text>
+<text x="374.2857142857143" y="412.0" font-size="22" fill="rgba(255,255,255,0.08)" font-weight="bold" font-family="Segoe UI">B</text>
+<g>
+<circle cx="182.93628544887957" cy="299.60662743839424" r="3" fill="#e74c3c" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="251.1239485047728" cy="275.8781432786642" r="3" fill="#e74c3c" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="201.58883610769618" cy="322.88322406322214" r="3" fill="#e74c3c" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="178.81556848815762" cy="326.1461382920112" r="3" fill="#e74c3c" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="204.8896226567015" cy="357.61861182126785" r="3" fill="#e74c3c" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="199.8731646143751" cy="349.70873388711175" r="3" fill="#e74c3c" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="201.2839245431321" cy="358.31326930979156" r="3" fill="#e74c3c" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="204.89302147783107" cy="365.85914686534625" r="3" fill="#e74c3c" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="161.06005204504544" cy="320.0957711021325" r="3" fill="#e67e22" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="187.66966613467184" cy="301.06739873572224" r="3" fill="#e67e22" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="212.53129753784313" cy="329.4619065229109" r="3" fill="#e67e22" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="195.9064849808044" cy="365.5483194409101" r="3" fill="#e67e22" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="173.31123455094965" cy="349.9969376040849" r="3" fill="#e67e22" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="243.75515570229828" cy="345.9284677442807" r="3" fill="#f1c40f" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="237.31300833444809" cy="341.214594852534" r="3" fill="#2ecc71" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="215.93944391839835" cy="322.8869154650001" r="3" fill="#2ecc71" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="209.57300555052416" cy="345.102214686452" r="3" fill="#1abc9c" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="221.30223268134924" cy="327.93140317159816" r="3" fill="#1abc9c" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="182.36058433286664" cy="311.2166670067047" r="3" fill="#e74c3c" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="173.00077075934598" cy="338.01926655655967" r="3" fill="#e74c3c" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="207.30550458856223" cy="347.43132298816124" r="3" fill="#e74c3c" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="200.56870343522354" cy="295.32135915458036" r="3" fill="#e74c3c" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="197.84295601926516" cy="337.36880070151415" r="3" fill="#e74c3c" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="162.1644367437947" cy="324.04510731516103" r="3" fill="#e67e22" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="190.1729508648512" cy="329.4690246697433" r="3" fill="#e67e22" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="185.10531079593244" cy="370.0729280033415" r="3" fill="#e67e22" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="208.2461559993881" cy="336.15414219821747" r="3" fill="#e67e22" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="197.83342761642047" cy="364.11911541401366" r="3" fill="#e67e22" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="172.72156495355472" cy="350.3208330607976" r="3" fill="#e67e22" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="246.71966971995002" cy="340.04938650145453" r="3" fill="#f1c40f" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="237.55593723859513" cy="339.32788074226386" r="3" fill="#2ecc71" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="214.93018719484508" cy="311.12913913744137" r="3" fill="#2ecc71" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="211.2250516447884" cy="339.5970050292399" r="3" fill="#1abc9c" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+<circle cx="219.5131226139822" cy="334.3657345318332" r="3" fill="#1abc9c" opacity="0.7" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+</g>
+<g>
+<circle cx="350" cy="80" r="3" fill="#e74c3c"/>
+<text x="365" y="84" font-size="11" fill="#fff" font-family="Segoe UI">Akshaya</text>
+<circle cx="350" cy="102" r="3" fill="#e67e22"/>
+<text x="365" y="106" font-size="11" fill="#fff" font-family="Segoe UI">Logesh</text>
+<circle cx="350" cy="124" r="3" fill="#f1c40f"/>
+<text x="365" y="128" font-size="11" fill="#fff" font-family="Segoe UI">Rohit</text>
+<circle cx="350" cy="146" r="3" fill="#2ecc71"/>
+<text x="365" y="150" font-size="11" fill="#fff" font-family="Segoe UI">Subudhi</text>
+<circle cx="350" cy="168" r="3" fill="#1abc9c"/>
+<text x="365" y="172" font-size="11" fill="#fff" font-family="Segoe UI">Sudha</text>
+</g>
+<text x="280" y="540" text-anchor="middle" font-size="12" fill="#aaa" font-family="Segoe UI">Reference (mg/dL)</text>
+<text x="20" y="280" text-anchor="middle" font-size="12" fill="#aaa" font-family="Segoe UI" transform="rotate(-90 20 280)">Predicted (mg/dL)</text>
+<text x="122.85714285714286" y="518" text-anchor="middle" font-size="10" fill="#888" font-family="Segoe UI">50</text>
+<text x="40" y="441.14285714285717" text-anchor="end" font-size="10" fill="#888" font-family="Segoe UI">50</text>
+<text x="185.71428571428572" y="518" text-anchor="middle" font-size="10" fill="#888" font-family="Segoe UI">100</text>
+<text x="40" y="378.2857142857143" text-anchor="end" font-size="10" fill="#888" font-family="Segoe UI">100</text>
+<text x="248.57142857142856" y="518" text-anchor="middle" font-size="10" fill="#888" font-family="Segoe UI">150</text>
+<text x="40" y="315.42857142857144" text-anchor="end" font-size="10" fill="#888" font-family="Segoe UI">150</text>
+<text x="311.42857142857144" y="518" text-anchor="middle" font-size="10" fill="#888" font-family="Segoe UI">200</text>
+<text x="40" y="252.57142857142858" text-anchor="end" font-size="10" fill="#888" font-family="Segoe UI">200</text>
+<text x="374.2857142857143" y="518" text-anchor="middle" font-size="10" fill="#888" font-family="Segoe UI">250</text>
+<text x="40" y="189.71428571428572" text-anchor="end" font-size="10" fill="#888" font-family="Segoe UI">250</text>
+<text x="437.1428571428571" y="518" text-anchor="middle" font-size="10" fill="#888" font-family="Segoe UI">300</text>
+<text x="40" y="126.85714285714289" text-anchor="end" font-size="10" fill="#888" font-family="Segoe UI">300</text>
+<text x="500.0" y="518" text-anchor="middle" font-size="10" fill="#888" font-family="Segoe UI">350</text>
+<text x="40" y="64.0" text-anchor="end" font-size="10" fill="#888" font-family="Segoe UI">350</text>
+</svg>
+<div class="stats-grid">
+    <div class="stat-box">
+        <div class="stat-label">Zone A</div>
+        <div class="stat-value">64.7%</div>
+        <div style="font-size: 0.85em; color: #999; margin-top: 5px;">22 / 34</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">Zone B</div>
+        <div class="stat-value">35.3%</div>
+        <div style="font-size: 0.85em; color: #999; margin-top: 5px;">12 / 34</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">Zone C</div>
+        <div class="stat-value good">0.0%</div>
+        <div style="font-size: 0.85em; color: #999; margin-top: 5px;">0 / 34</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">Zone D</div>
+        <div class="stat-value good">0.0%</div>
+        <div style="font-size: 0.85em; color: #999; margin-top: 5px;">0 / 34</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">Zone E</div>
+        <div class="stat-value good">0.0%</div>
+        <div style="font-size: 0.85em; color: #999; margin-top: 5px;">0 / 34</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">A+B (Acceptable)</div>
+        <div class="stat-value good">100.0%</div>
+        <div style="font-size: 0.85em; color: #999; margin-top: 5px;">Clinically Acceptable</div>
+    </div>
+</div>
+
+<!-- ===== ACCURACY THRESHOLDS ===== -->
+<h2>4. Accuracy Thresholds</h2>
+<div class="stats-grid">
+    <div class="stat-box">
+        <div class="stat-label">Within ±15 mg/dL</div>
+        <div class="stat-value">41.2%</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">Within ±20 mg/dL</div>
+        <div class="stat-value">55.9%</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">Within ±30 mg/dL</div>
+        <div class="stat-value">76.5%</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">Within ±20% or ±20 mg/dL</div>
+        <div class="stat-value">64.7%</div>
+    </div>
+</div>
+
+<!-- ===== PER-PERSON BREAKDOWN ===== -->
+<h2>5. Per-Person Breakdown</h2>
+<table>
+    <tr>
+        <th>Rank</th>
+        <th class="left">Person</th>
+        <th>Samples</th>
+        <th>Ref Range (mg/dL)</th>
+        <th>MAE (mg/dL)</th>
+        <th>MARD (%)</th>
+        <th>Bias (mg/dL)</th>
+        <th>Pred Mean</th>
+        <th>Zone A (%)</th>
+        <th>Zone A+B (%)</th>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td class="left">Sudha</td>
+        <td>4</td>
+        <td>119-127</td>
+        <td class="good">6.89</td>
+        <td>5.60%</td>
+        <td>+6.89</td>
+        <td>129.9</td>
+        <td>100.0%</td>
+        <td>100.0%</td>
+    </tr>
+    <tr>
+        <td>2</td>
+        <td class="left">Subudhi</td>
+        <td>4</td>
+        <td>125-142</td>
+        <td class="good">18.20</td>
+        <td>13.83%</td>
+        <td>+2.88</td>
+        <td>136.4</td>
+        <td>100.0%</td>
+        <td>100.0%</td>
+    </tr>
+    <tr>
+        <td>3</td>
+        <td class="left">Rohit</td>
+        <td>2</td>
+        <td>148-148</td>
+        <td class="warn">22.03</td>
+        <td>14.89%</td>
+        <td>-22.03</td>
+        <td>126.0</td>
+        <td>100.0%</td>
+        <td>100.0%</td>
+    </tr>
+    <tr>
+        <td>4</td>
+        <td class="left">Akshaya</td>
+        <td>13</td>
+        <td>92-151</td>
+        <td class="warn">26.89</td>
+        <td>25.86%</td>
+        <td>+24.36</td>
+        <td>135.1</td>
+        <td>53.8%</td>
+        <td>100.0%</td>
+    </tr>
+    <tr>
+        <td>5</td>
+        <td class="left">Logesh</td>
+        <td>11</td>
+        <td>82-119</td>
+        <td class="warn">27.03</td>
+        <td>29.29%</td>
+        <td>+26.43</td>
+        <td>126.9</td>
+        <td>45.5%</td>
+        <td>100.0%</td>
+    </tr>
+</table>
+
+<!-- ===== DETAILED RESULTS ===== -->
+<h2>6. Detailed Results</h2>
+<table>
+    <tr>
+        <th>#</th>
+        <th class="left">Person</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Sys/Dia</th>
+        <th>Ref (mg/dL)</th>
+        <th>Pred (mg/dL)</th>
+        <th>Error (mg/dL)</th>
+        <th>MARD (%)</th>
+        <th>Windows</th>
+        <th>Zone</th>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td class="left">Akshaya</td>
+        <td>22_12_2025</td>
+        <td>16_02</td>
+        <td>110/84</td>
+        <td>97</td>
+        <td>159.2</td>
+        <td class="bad">+62.2</td>
+        <td>64.1%</td>
+        <td>64</td>
+        <td class="good">B</td>
+    </tr>
+    <tr>
+        <td>2</td>
+        <td class="left">Akshaya</td>
+        <td>22_12_2025</td>
+        <td>20_34</td>
+        <td>115/82</td>
+        <td>151</td>
+        <td>180.7</td>
+        <td class="warn">+29.7</td>
+        <td>19.7%</td>
+        <td>5</td>
+        <td class="good">A</td>
+    </tr>
+    <tr>
+        <td>3</td>
+        <td class="left">Akshaya</td>
+        <td>22_12_2025</td>
+        <td>20_54</td>
+        <td>115/82</td>
+        <td>113</td>
+        <td>140.5</td>
+        <td class="warn">+27.5</td>
+        <td>24.4%</td>
+        <td>4</td>
+        <td class="good">B</td>
+    </tr>
+    <tr>
+        <td>4</td>
+        <td class="left">Akshaya</td>
+        <td>22_12_2025</td>
+        <td>21_09</td>
+        <td>111/84</td>
+        <td>92</td>
+        <td>139.5</td>
+        <td class="bad">+47.5</td>
+        <td>51.6%</td>
+        <td>1</td>
+        <td class="good">B</td>
+    </tr>
+    <tr>
+        <td>5</td>
+        <td class="left">Akshaya</td>
+        <td>22_12_2025</td>
+        <td>21_43</td>
+        <td>110/81</td>
+        <td>116</td>
+        <td>114.1</td>
+        <td class="good">-1.9</td>
+        <td>1.6%</td>
+        <td>46</td>
+        <td class="good">A</td>
+    </tr>
+    <tr>
+        <td>6</td>
+        <td class="left">Akshaya</td>
+        <td>23_12_2025</td>
+        <td>16_38</td>
+        <td>115/88</td>
+        <td>112</td>
+        <td>118.8</td>
+        <td class="good">+6.8</td>
+        <td>6.1%</td>
+        <td>1</td>
+        <td class="good">A</td>
+    </tr>
+    <tr>
+        <td>7</td>
+        <td class="left">Akshaya</td>
+        <td>23_12_2025</td>
+        <td>16_41</td>
+        <td>115/88</td>
+        <td>112</td>
+        <td>109.7</td>
+        <td class="good">-2.3</td>
+        <td>2.1%</td>
+        <td>8</td>
+        <td class="good">A</td>
+    </tr>
+    <tr>
+        <td>8</td>
+        <td class="left">Akshaya</td>
+        <td>25_12_2025</td>
+        <td>14_33</td>
+        <td>117/65</td>
+        <td>118</td>
+        <td>105.8</td>
+        <td class="good">-12.2</td>
+        <td>10.3%</td>
+        <td>1</td>
+        <td class="good">A</td>
+    </tr>
+    <tr>
+        <td>9</td>
+        <td class="left">Logesh</td>
+        <td>22_12_2025</td>
+        <td>16_23</td>
+        <td>121/77</td>
+        <td>82</td>
+        <td>143.6</td>
+        <td class="bad">+61.6</td>
+        <td>75.1%</td>
+        <td>5</td>
+        <td class="good">B</td>
+    </tr>
+    <tr>
+        <td>10</td>
+        <td class="left">Logesh</td>
+        <td>23_12_2025</td>
+        <td>19_04</td>
+        <td>120/74</td>
+        <td>103</td>
+        <td>156.0</td>
+        <td class="bad">+53.0</td>
+        <td>51.5%</td>
+        <td>2</td>
+        <td class="good">B</td>
+    </tr>
+    <tr>
+        <td>11</td>
+        <td class="left">Logesh</td>
+        <td>25_12_2025</td>
+        <td>11_00</td>
+        <td>120/59</td>
+        <td>119</td>
+        <td>135.3</td>
+        <td class="good">+16.3</td>
+        <td>13.7%</td>
+        <td>10</td>
+        <td class="good">A</td>
+    </tr>
+    <tr>
+        <td>12</td>
+        <td class="left">Logesh</td>
+        <td>25_12_2025</td>
+        <td>14_45</td>
+        <td>112/67</td>
+        <td>108</td>
+        <td>104.7</td>
+        <td class="good">-3.3</td>
+        <td>3.1%</td>
+        <td>47</td>
+        <td class="good">A</td>
+    </tr>
+    <tr>
+        <td>13</td>
+        <td class="left">Logesh</td>
+        <td>26_12_2025</td>
+        <td>09_21</td>
+        <td>115/78</td>
+        <td>91</td>
+        <td>119.5</td>
+        <td class="warn">+28.5</td>
+        <td>31.3%</td>
+        <td>10</td>
+        <td class="good">B</td>
+    </tr>
+    <tr>
+        <td>14</td>
+        <td class="left">Rohit</td>
+        <td>19_12_2025</td>
+        <td>15_40</td>
+        <td>130/88</td>
+        <td>148</td>
+        <td>123.2</td>
+        <td class="warn">-24.8</td>
+        <td>16.8%</td>
+        <td>19</td>
+        <td class="good">A</td>
+    </tr>
+    <tr>
+        <td>15</td>
+        <td class="left">Subudhi</td>
+        <td>19_12_2025</td>
+        <td>16_20</td>
+        <td>126/86</td>
+        <td>142</td>
+        <td>125.8</td>
+        <td class="good">-16.2</td>
+        <td>11.4%</td>
+        <td>47</td>
+        <td class="good">A</td>
+    </tr>
+    <tr>
+        <td>16</td>
+        <td class="left">Subudhi</td>
+        <td>25_12_2025</td>
+        <td>12_25</td>
+        <td>119/71</td>
+        <td>125</td>
+        <td>143.8</td>
+        <td class="good">+18.8</td>
+        <td>15.1%</td>
+        <td>37</td>
+        <td class="good">A</td>
+    </tr>
+    <tr>
+        <td>17</td>
+        <td class="left">Sudha</td>
+        <td>24_12_2025</td>
+        <td>11_35</td>
+        <td>121/80</td>
+        <td>119</td>
+        <td>121.5</td>
+        <td class="good">+2.5</td>
+        <td>2.1%</td>
+        <td>60</td>
+        <td class="good">A</td>
+    </tr>
+    <tr>
+        <td>18</td>
+        <td class="left">Sudha</td>
+        <td>26_12_2025</td>
+        <td>10_56</td>
+        <td>129/75</td>
+        <td>127</td>
+        <td>134.9</td>
+        <td class="good">+7.9</td>
+        <td>6.2%</td>
+        <td>66</td>
+        <td class="good">A</td>
+    </tr>
+    <tr>
+        <td>19</td>
+        <td class="left">Akshaya</td>
+        <td>22_12_2025</td>
+        <td>16_02</td>
+        <td>110/84</td>
+        <td>97</td>
+        <td>147.1</td>
+        <td class="bad">+50.1</td>
+        <td>51.6%</td>
+        <td>34</td>
+        <td class="good">B</td>
+    </tr>
+    <tr>
+        <td>20</td>
+        <td class="left">Akshaya</td>
+        <td>22_12_2025</td>
+        <td>21_09</td>
+        <td>111/84</td>
+        <td>92</td>
+        <td>129.2</td>
+        <td class="warn">+37.2</td>
+        <td>40.4%</td>
+        <td>1</td>
+        <td class="good">B</td>
+    </tr>
+    <tr>
+        <td>21</td>
+        <td class="left">Akshaya</td>
+        <td>22_12_2025</td>
+        <td>21_43</td>
+        <td>110/81</td>
+        <td>116</td>
+        <td>121.6</td>
+        <td class="good">+5.6</td>
+        <td>4.9%</td>
+        <td>31</td>
+        <td class="good">A</td>
+    </tr>
+    <tr>
+        <td>22</td>
+        <td class="left">Akshaya</td>
+        <td>23_12_2025</td>
+        <td>16_38</td>
+        <td>115/88</td>
+        <td>112</td>
+        <td>162.3</td>
+        <td class="bad">+50.3</td>
+        <td>44.9%</td>
+        <td>1</td>
+        <td class="good">B</td>
+    </tr>
+    <tr>
+        <td>23</td>
+        <td class="left">Akshaya</td>
+        <td>23_12_2025</td>
+        <td>16_41</td>
+        <td>115/88</td>
+        <td>112</td>
+        <td>128.2</td>
+        <td class="good">+16.2</td>
+        <td>14.5%</td>
+        <td>4</td>
+        <td class="good">A</td>
+    </tr>
+    <tr>
+        <td>24</td>
+        <td class="left">Logesh</td>
+        <td>22_12_2025</td>
+        <td>16_23</td>
+        <td>121/77</td>
+        <td>82</td>
+        <td>141.6</td>
+        <td class="bad">+59.6</td>
+        <td>72.7%</td>
+        <td>2</td>
+        <td class="good">B</td>
+    </tr>
+    <tr>
+        <td>25</td>
+        <td class="left">Logesh</td>
+        <td>23_12_2025</td>
+        <td>19_04</td>
+        <td>120/74</td>
+        <td>103</td>
+        <td>132.8</td>
+        <td class="warn">+29.8</td>
+        <td>29.0%</td>
+        <td>9</td>
+        <td class="good">B</td>
+    </tr>
+    <tr>
+        <td>26</td>
+        <td class="left">Logesh</td>
+        <td>24_12_2025</td>
+        <td>09_37</td>
+        <td>109/66</td>
+        <td>99</td>
+        <td>102.7</td>
+        <td class="good">+3.7</td>
+        <td>3.8%</td>
+        <td>1</td>
+        <td class="good">A</td>
+    </tr>
+    <tr>
+        <td>27</td>
+        <td class="left">Logesh</td>
+        <td>25_12_2025</td>
+        <td>11_00</td>
+        <td>120/59</td>
+        <td>119</td>
+        <td>131.3</td>
+        <td class="good">+12.3</td>
+        <td>10.3%</td>
+        <td>10</td>
+        <td class="good">A</td>
+    </tr>
+    <tr>
+        <td>28</td>
+        <td class="left">Logesh</td>
+        <td>25_12_2025</td>
+        <td>14_45</td>
+        <td>112/67</td>
+        <td>108</td>
+        <td>109.6</td>
+        <td class="good">+1.6</td>
+        <td>1.5%</td>
+        <td>42</td>
+        <td class="good">A</td>
+    </tr>
+    <tr>
+        <td>29</td>
+        <td class="left">Logesh</td>
+        <td>26_12_2025</td>
+        <td>09_21</td>
+        <td>115/78</td>
+        <td>91</td>
+        <td>118.6</td>
+        <td class="warn">+27.6</td>
+        <td>30.3%</td>
+        <td>6</td>
+        <td class="good">B</td>
+    </tr>
+    <tr>
+        <td>30</td>
+        <td class="left">Rohit</td>
+        <td>19_12_2025</td>
+        <td>15_40</td>
+        <td>130/88</td>
+        <td>148</td>
+        <td>128.8</td>
+        <td class="good">-19.2</td>
+        <td>13.0%</td>
+        <td>14</td>
+        <td class="good">A</td>
+    </tr>
+    <tr>
+        <td>31</td>
+        <td class="left">Subudhi</td>
+        <td>19_12_2025</td>
+        <td>16_20</td>
+        <td>126/86</td>
+        <td>142</td>
+        <td>127.5</td>
+        <td class="good">-14.5</td>
+        <td>10.2%</td>
+        <td>27</td>
+        <td class="good">A</td>
+    </tr>
+    <tr>
+        <td>32</td>
+        <td class="left">Subudhi</td>
+        <td>25_12_2025</td>
+        <td>12_25</td>
+        <td>119/71</td>
+        <td>125</td>
+        <td>148.3</td>
+        <td class="warn">+23.3</td>
+        <td>18.7%</td>
+        <td>31</td>
+        <td class="good">A</td>
+    </tr>
+    <tr>
+        <td>33</td>
+        <td class="left">Sudha</td>
+        <td>24_12_2025</td>
+        <td>11_35</td>
+        <td>121/80</td>
+        <td>119</td>
+        <td>129.8</td>
+        <td class="good">+10.8</td>
+        <td>9.0%</td>
+        <td>39</td>
+        <td class="good">A</td>
+    </tr>
+    <tr>
+        <td>34</td>
+        <td class="left">Sudha</td>
+        <td>26_12_2025</td>
+        <td>10_56</td>
+        <td>129/75</td>
+        <td>127</td>
+        <td>133.4</td>
+        <td class="good">+6.4</td>
+        <td>5.0%</td>
+        <td>58</td>
+        <td class="good">A</td>
+    </tr>
+</table>
+
+<!-- ===== FAILED SAMPLES ===== -->
+<h2>7. Failed Samples (12)</h2>
+<table>
+    <tr><th>Person</th><th>Date</th><th>Time</th><th>Sys/Dia</th><th>Reason</th></tr>
+    <tr>
+        <td>Akshaya</td>
+        <td>24_12_2025</td>
+        <td>19_07</td>
+        <td>126/89</td>
+        <td>No windows extracted after peak-based filtering</td>
+    </tr>
+    <tr>
+        <td>Akshaya</td>
+        <td>25_12_2025</td>
+        <td>15_39</td>
+        <td>118/82</td>
+        <td>No windows extracted after peak-based filtering</td>
+    </tr>
+    <tr>
+        <td>Logesh</td>
+        <td>19_12_2025</td>
+        <td>16_37</td>
+        <td>130/83</td>
+        <td>No windows extracted after peak-based filtering</td>
+    </tr>
+    <tr>
+        <td>Logesh</td>
+        <td>24_12_2025</td>
+        <td>09_37</td>
+        <td>109/66</td>
+        <td>No windows extracted after peak-based filtering</td>
+    </tr>
+    <tr>
+        <td>Rohan</td>
+        <td>25_12_2025</td>
+        <td>12_34</td>
+        <td>116/74</td>
+        <td>No windows extracted after peak-based filtering</td>
+    </tr>
+    <tr>
+        <td>Akshaya</td>
+        <td>22_12_2025</td>
+        <td>20_34</td>
+        <td>115/82</td>
+        <td>No windows extracted after peak-based filtering</td>
+    </tr>
+    <tr>
+        <td>Akshaya</td>
+        <td>22_12_2025</td>
+        <td>20_54</td>
+        <td>115/82</td>
+        <td>No windows extracted after peak-based filtering</td>
+    </tr>
+    <tr>
+        <td>Akshaya</td>
+        <td>24_12_2025</td>
+        <td>19_07</td>
+        <td>126/89</td>
+        <td>No windows extracted after peak-based filtering</td>
+    </tr>
+    <tr>
+        <td>Akshaya</td>
+        <td>25_12_2025</td>
+        <td>14_33</td>
+        <td>117/65</td>
+        <td>No windows extracted after peak-based filtering</td>
+    </tr>
+    <tr>
+        <td>Akshaya</td>
+        <td>25_12_2025</td>
+        <td>15_39</td>
+        <td>118/82</td>
+        <td>No windows extracted after peak-based filtering</td>
+    </tr>
+    <tr>
+        <td>Logesh</td>
+        <td>19_12_2025</td>
+        <td>16_37</td>
+        <td>130/83</td>
+        <td>No windows extracted after peak-based filtering</td>
+    </tr>
+    <tr>
+        <td>Rohan</td>
+        <td>25_12_2025</td>
+        <td>12_34</td>
+        <td>116/74</td>
+        <td>No windows extracted after peak-based filtering</td>
+    </tr>
+</table>
+
+<!-- ===== CLINICAL ASSESSMENT ===== -->
+<h2>8. Clinical Assessment</h2>
+
+<div class="insight-box">
+    <h3>Performance Summary</h3>
+    <ul>
+        <li><b>Zone A (Clinically Accurate):</b> <span class='good'>64.7%</span></li>
+        <li><b>Clinically Acceptable (A+B):</b> <span class="good">100.0%</span></li>
+        <li><b>ISO 15197:</b> Meets the 95% A+B requirement</li>
+        <li><b>Within +/-20 mg/dL:</b> 55.9% | <b>Within +/-30 mg/dL:</b> 76.5%</li>
+        <li><b>Dangerous Zones (D+E):</b> <span class="good">0.0%</span></li>
+    </ul>
+</div>
+
+<div class="insight-box">
+    <h3>Key Observations</h3>
+    <ul><li class="warn">MAE of 23.3 mg/dL is moderate; further improvement needed</li><li class="warn">Systematic bias of +17.7 mg/dL detected - model tends to overpredict</li>
+        <li><b>Best person:</b> Sudha (MAE=6.9, n=4)</li>
+        <li><b>Worst person:</b> Logesh (MAE=27.0, n=11)</li>
+        <li><b>Failure rate:</b> 12/46 (26%)</li>
+        <li>Pearson correlation: 0.076</li>
+        <li><b>Note:</b> This analysis is constrained to normal blood pressure readings (Sys≤130, Dia≤90)</li>
+    </ul>
+</div>
+
+<div class="insight-box">
+    <h3>Recommendations</h3>
+    <ul><li>Apply bias correction (+17.7 mg/dL offset) as a post-processing step</li><li>Low R2 indicates model needs architectural or training improvements for this data source</li>
+        <li>This vanilla PPG data differs from VitalDB training data; domain adaptation or fine-tuning on lab PPG data may improve results</li>
+        <li>Consider the impact of elevated blood pressure on PPG signal characteristics</li>
+    </ul>
+</div>
+
+<p style="text-align:center; color:#555; margin-top:50px; font-size:0.82em;">
+    Generated by analyze_vanilla_ppg_with_bp_constraints.py | Batch 1 (BP Constrained: Sys≤{SYSTOLIC_MAX}, Dia≤{DIASTOLIC_MAX})
+</p>
+</body></html>

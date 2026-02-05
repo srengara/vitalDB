@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Iteration Comparison</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f0f23; color: #e2e8f0; line-height: 1.6; padding: 30px; }
+h1 { text-align: center; font-size: 2em; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px; }
+.subtitle { text-align: center; color: #94a3b8; margin-bottom: 30px; font-size: 0.95em; }
+h2 { color: #667eea; border-bottom: 2px solid #667eea40; padding-bottom: 8px; margin: 35px 0 20px; font-size: 1.4em; }
+h3 { color: #818cf8; margin: 20px 0 12px; font-size: 1.1em; }
+
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin: 20px 0; }
+.metric-card { background: #1e293b; border-radius: 10px; padding: 16px; text-align: center; }
+.metric-label { color: #94a3b8; font-size: 0.8em; margin-bottom: 4px; }
+.metric-value { font-size: 1.8em; font-weight: 700; }
+.metric-unit { color: #64748b; font-size: 0.75em; }
+
+table { width: 100%; border-collapse: collapse; margin: 15px 0; background: #1e293b; border-radius: 8px; overflow: hidden; font-size: 0.88em; }
+th { background: #334155; padding: 10px 12px; text-align: center; color: #e2e8f0; font-weight: 600; }
+td { padding: 8px 12px; text-align: center; border-bottom: 1px solid #334155; }
+tr:hover { background: #334155aa; }
+td.left { text-align: left; }
+.good { color: #22c55e; }
+.warn { color: #f59e0b; }
+.bad { color: #ef4444; }
+.neutral { color: #94a3b8; }
+
+.highlight-row { background: rgba(102,126,234,0.15) !important; font-weight: bold; }
+.insight-box { background: #1e293b; border: 1px solid #667eea40; border-radius: 12px; padding: 20px 24px; margin: 20px 0; }
+.insight-box h3 { color: #667eea; margin-top: 0; }
+.insight-box ul { margin-left: 20px; }
+.insight-box li { margin-bottom: 8px; }
+.chart-container { text-align: center; margin: 20px 0; overflow-x: auto; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+.delta-good { background: #22c55e20; color: #22c55e; padding: 2px 8px; border-radius: 6px; font-weight: 600; }
+.delta-bad { background: #ef444420; color: #ef4444; padding: 2px 8px; border-radius: 6px; font-weight: 600; }
+.delta-neutral { background: #64748b20; color: #94a3b8; padding: 2px 8px; border-radius: 6px; }
+
+footer { text-align: center; color: #475569; margin-top: 40px; font-size: 0.8em; padding-top: 20px; border-top: 1px solid #334155; }
+</style>
+</head><body>
+
+<h1>Baseline vs Iteration 1 Comparison</h1>
+<p class="subtitle">
+    Effect of skipping single-peak window check | Batch 1 only | Red PPG + IR PPG
+</p>
+
+<!-- ===== VERDICT ===== -->
+<h2>1. Verdict</h2>
+<div class="card-grid">
+    <div class="metric-card">
+        <div class="metric-label">MAE Change</div>
+        <div class="metric-value bad">&#x25B2; 6.8</div>
+        <div class="metric-unit">mg/dL regression</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Success Rate</div>
+        <div class="metric-value">62&rarr;66</div>
+        <div class="metric-unit">of 80 samples</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Matched Samples</div>
+        <div class="metric-value">53</div>
+        <div class="metric-unit">28 improved, 24 worsened</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Newly Recovered</div>
+        <div class="metric-value">13</div>
+        <div class="metric-unit">were FAILED, now OK</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Newly Failed</div>
+        <div class="metric-value bad">9</div>
+        <div class="metric-unit">were OK, now FAILED</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Zone A</div>
+        <div class="metric-value">53%&rarr;41%</div>
+        <div class="metric-unit">&#x25BC; 12.3pp</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Avg Windows</div>
+        <div class="metric-value">22&rarr;61</div>
+        <div class="metric-unit">per sample</div>
+    </div>
+</div>
+
+<!-- ===== OVERALL COMPARISON ===== -->
+<h2>2. Overall Metrics Comparison</h2>
+<table>
+    <tr><th>Metric</th><th>Baseline</th><th>Iteration 1</th><th>Change</th></tr>
+    <tr><td class="left"><b>Succeeded / Total</b></td><td>62 / 80</td><td>66 / 80</td>
+    <td class="good">+4.0</td></tr>
+    <tr><td class="left"><b>MAE (mg/dL)</b></td><td>31.1</td><td>37.9</td>
+    <td class="bad">+6.8</td></tr>
+    <tr><td class="left"><b>RMSE (mg/dL)</b></td><td>40.8</td><td>48.6</td>
+    <td class="bad">+7.8</td></tr>
+    <tr><td class="left"><b>MARD (%)</b></td><td>29.6</td><td>35.7</td>
+    <td class="bad">+6.1</td></tr>
+    <tr><td class="left"><b>Bias (mg/dL)</b></td><td>+17.2</td><td>+28.0</td>
+    <td class="bad">+10.9</td></tr>
+    <tr><td class="left"><b>R2</b></td><td>-1.085</td><td>-2.058</td>
+    <td class="bad">-1.0</td></tr>
+    <tr><td class="left"><b>Within +/-20 mg/dL (%)</b></td><td>48.4</td><td>37.9</td>
+    <td class="bad">-10.5</td></tr>
+    <tr><td class="left"><b>Within +/-30 mg/dL (%)</b></td><td>61.3</td><td>50.0</td>
+    <td class="bad">-11.3</td></tr>
+    <tr><td class="left"><b>Zone A (%)</b></td><td>53.2</td><td>40.9</td>
+    <td class="bad">-12.3</td></tr>
+    <tr><td class="left"><b>Zone A+B (%)</b></td><td>100.0</td><td>100.0</td>
+    <td class="neutral">0.0</td></tr>
+    <tr><td class="left"><b>Avg Windows/Sample</b></td><td>22.3</td><td>60.7</td>
+    <td class="good">+38.4</td></tr>
+    <tr><td class="left"><b>Avg Similarity</b></td><td>0.959</td><td>0.862</td>
+    <td class="neutral">-0.1</td></tr>
+    <tr><td class="left"><b>Avg Pred Std</b></td><td>11.3</td><td>15.6</td>
+    <td class="bad">+4.3</td></tr>
+</table>
+
+<!-- ===== PPG TYPE ===== -->
+<h2>3. By PPG Type</h2>
+<table>
+    <tr><th>PPG</th><th colspan="3">Baseline</th><th colspan="3">Iteration 1</th><th colspan="3">Change</th></tr>
+    <tr><th></th><th>N</th><th>MAE</th><th>Zone A</th><th>N</th><th>MAE</th><th>Zone A</th><th>&Delta;N</th><th>&Delta;MAE</th><th>&Delta;Zone A</th></tr>
+    <tr>
+        <td><b>Red</b></td>
+        <td>32</td><td>30.5</td><td>53.1%</td>
+        <td>32</td><td>42.9</td><td>37.5%</td>
+        <td>+0</td>
+        <td class="bad">+12.4</td>
+        <td class="bad">-15.6pp</td>
+    </tr>
+    <tr>
+        <td><b>IR</b></td>
+        <td>30</td><td>31.8</td><td>53.3%</td>
+        <td>34</td><td>33.3</td><td>44.1%</td>
+        <td>+4</td>
+        <td class="bad">+1.5</td>
+        <td class="bad">-9.2pp</td>
+    </tr></table>
+<h2>4. Per-Sample Impact (Matched: 53)</h2>
+<div class="chart-container"><svg viewBox="0 0 750 300" xmlns="http://www.w3.org/2000/svg" style="font-family:Segoe UI,sans-serif;">
+<rect width="750" height="300" fill="#1e293b" rx="8"/>
+<text x="375" y="20" text-anchor="middle" fill="#94a3b8" font-size="12">Per-Sample MAE Change (sorted, green=improved, red=worsened)</text>
+<line x1="50" y1="150" x2="700" y2="150" stroke="#64748b" stroke-width="1"/>
+<text x="45" y="154" text-anchor="end" fill="#64748b" font-size="10">0</text>
+<line x1="50" y1="250.0" x2="700" y2="250.0" stroke="#334155" stroke-width="0.5"/>
+<text x="45" y="254.0" text-anchor="end" fill="#64748b" font-size="9">-48</text>
+<line x1="50" y1="200.0" x2="700" y2="200.0" stroke="#334155" stroke-width="0.5"/>
+<text x="45" y="204.0" text-anchor="end" fill="#64748b" font-size="9">-24</text>
+<line x1="50" y1="100.0" x2="700" y2="100.0" stroke="#334155" stroke-width="0.5"/>
+<text x="45" y="104.0" text-anchor="end" fill="#64748b" font-size="9">+24</text>
+<line x1="50" y1="50.0" x2="700" y2="50.0" stroke="#334155" stroke-width="0.5"/>
+<text x="45" y="54.0" text-anchor="end" fill="#64748b" font-size="9">+48</text>
+<rect x="50" y="57.6" width="11" height="92.4" fill="#22c55e" opacity="0.7"/>
+<rect x="62" y="93.7" width="11" height="56.3" fill="#22c55e" opacity="0.7"/>
+<rect x="74" y="130.9" width="11" height="19.1" fill="#22c55e" opacity="0.7"/>
+<rect x="86" y="132.0" width="11" height="18.0" fill="#22c55e" opacity="0.7"/>
+<rect x="98" y="133.6" width="11" height="16.4" fill="#22c55e" opacity="0.7"/>
+<rect x="110" y="138.3" width="11" height="11.7" fill="#22c55e" opacity="0.7"/>
+<rect x="122" y="140.0" width="11" height="10.0" fill="#22c55e" opacity="0.7"/>
+<rect x="134" y="142.9" width="11" height="7.1" fill="#22c55e" opacity="0.7"/>
+<rect x="146" y="143.2" width="11" height="6.8" fill="#22c55e" opacity="0.7"/>
+<rect x="158" y="143.6" width="11" height="6.4" fill="#22c55e" opacity="0.7"/>
+<rect x="170" y="144.5" width="11" height="5.5" fill="#22c55e" opacity="0.7"/>
+<rect x="182" y="144.8" width="11" height="5.2" fill="#22c55e" opacity="0.7"/>
+<rect x="194" y="145.4" width="11" height="4.6" fill="#22c55e" opacity="0.7"/>
+<rect x="206" y="145.9" width="11" height="4.1" fill="#22c55e" opacity="0.7"/>
+<rect x="218" y="146.1" width="11" height="3.9" fill="#22c55e" opacity="0.7"/>
+<rect x="230" y="146.6" width="11" height="3.4" fill="#22c55e" opacity="0.7"/>
+<rect x="242" y="147.5" width="11" height="2.5" fill="#22c55e" opacity="0.7"/>
+<rect x="254" y="147.5" width="11" height="2.5" fill="#22c55e" opacity="0.7"/>
+<rect x="266" y="148.2" width="11" height="1.8" fill="#22c55e" opacity="0.7"/>
+<rect x="278" y="148.6" width="11" height="1.4" fill="#22c55e" opacity="0.7"/>
+<rect x="290" y="148.7" width="11" height="1.3" fill="#22c55e" opacity="0.7"/>
+<rect x="302" y="149.0" width="11" height="1.0" fill="#22c55e" opacity="0.7"/>
+<rect x="314" y="149.2" width="11" height="0.8" fill="#22c55e" opacity="0.7"/>
+<rect x="326" y="149.5" width="11" height="0.5" fill="#22c55e" opacity="0.7"/>
+<rect x="338" y="149.6" width="11" height="0.4" fill="#22c55e" opacity="0.7"/>
+<rect x="350" y="149.6" width="11" height="0.4" fill="#22c55e" opacity="0.7"/>
+<rect x="362" y="149.8" width="11" height="0.2" fill="#22c55e" opacity="0.7"/>
+<rect x="374" y="149.9" width="11" height="0.1" fill="#22c55e" opacity="0.7"/>
+<rect x="386" y="150.0" width="11" height="0.0" fill="#ef4444" opacity="0.7"/>
+<rect x="398" y="150.0" width="11" height="0.8" fill="#ef4444" opacity="0.7"/>
+<rect x="410" y="150.0" width="11" height="0.9" fill="#ef4444" opacity="0.7"/>
+<rect x="422" y="150.0" width="11" height="1.5" fill="#ef4444" opacity="0.7"/>
+<rect x="434" y="150.0" width="11" height="1.9" fill="#ef4444" opacity="0.7"/>
+<rect x="446" y="150.0" width="11" height="2.8" fill="#ef4444" opacity="0.7"/>
+<rect x="458" y="150.0" width="11" height="4.0" fill="#ef4444" opacity="0.7"/>
+<rect x="470" y="150.0" width="11" height="5.8" fill="#ef4444" opacity="0.7"/>
+<rect x="482" y="150.0" width="11" height="6.0" fill="#ef4444" opacity="0.7"/>
+<rect x="494" y="150.0" width="11" height="7.1" fill="#ef4444" opacity="0.7"/>
+<rect x="506" y="150.0" width="11" height="8.0" fill="#ef4444" opacity="0.7"/>
+<rect x="518" y="150.0" width="11" height="10.7" fill="#ef4444" opacity="0.7"/>
+<rect x="530" y="150.0" width="11" height="11.0" fill="#ef4444" opacity="0.7"/>
+<rect x="542" y="150.0" width="11" height="11.5" fill="#ef4444" opacity="0.7"/>
+<rect x="554" y="150.0" width="11" height="14.2" fill="#ef4444" opacity="0.7"/>
+<rect x="566" y="150.0" width="11" height="14.3" fill="#ef4444" opacity="0.7"/>
+<rect x="578" y="150.0" width="11" height="21.5" fill="#ef4444" opacity="0.7"/>
+<rect x="590" y="150.0" width="11" height="23.2" fill="#ef4444" opacity="0.7"/>
+<rect x="602" y="150.0" width="11" height="29.1" fill="#ef4444" opacity="0.7"/>
+<rect x="614" y="150.0" width="11" height="31.1" fill="#ef4444" opacity="0.7"/>
+<rect x="626" y="150.0" width="11" height="41.2" fill="#ef4444" opacity="0.7"/>
+<rect x="638" y="150.0" width="11" height="45.7" fill="#ef4444" opacity="0.7"/>
+<rect x="650" y="150.0" width="11" height="52.0" fill="#ef4444" opacity="0.7"/>
+<rect x="662" y="150.0" width="11" height="70.7" fill="#ef4444" opacity="0.7"/>
+<rect x="674" y="150.0" width="11" height="100.0" fill="#ef4444" opacity="0.7"/>
+<text x="375" y="295" text-anchor="middle" fill="#64748b" font-size="10">Samples (sorted by MAE change)</text>
+</svg></div>
+
+<div class="insight-box">
+    <h3>Window Count vs Accuracy Trade-off</h3>
+    <p>Skipping the single-peak check dramatically increases window count (avg 22 &rarr; 61),
+    but many of the additional windows contain multi-peak artifacts that add noise to predictions.</p>
+    <ul>
+        <li><b>28 samples improved</b> (more windows helped averaging)</li>
+        <li><b>24 samples worsened</b> (noisy windows degraded predictions)</li>
+        <li>Median MAE change: <b>-0.1 mg/dL</b></li>
+    </ul>
+</div>
+
+<div class="chart-container"><svg viewBox="0 0 450 300" xmlns="http://www.w3.org/2000/svg" style="font-family:Segoe UI,sans-serif;">
+<rect width="450" height="300" fill="#1e293b" rx="8"/>
+<text x="225" y="18" text-anchor="middle" fill="#94a3b8" font-size="12">Window Count Change vs MAE Change</text>
+<line x1="87.90322580645162" y1="55" x2="87.90322580645162" y2="245" stroke="#64748b" stroke-width="0.5" stroke-dasharray="4,4"/>
+<line x1="55" y1="153.73614916489754" x2="395" y2="153.73614916489754" stroke="#64748b" stroke-width="0.5" stroke-dasharray="4,4"/>
+<circle cx="135.4" cy="148.0" r="4" fill="#ef4444" opacity="0.6"/>
+<circle cx="347.5" cy="132.5" r="4" fill="#ef4444" opacity="0.6"/>
+<circle cx="299.9" cy="163.6" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="369.4" cy="83.9" r="4" fill="#ef4444" opacity="0.6"/>
+<circle cx="135.4" cy="157.6" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="329.2" cy="55.0" r="4" fill="#ef4444" opacity="0.6"/>
+<circle cx="278.0" cy="170.0" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="248.8" cy="150.9" r="4" fill="#ef4444" opacity="0.6"/>
+<circle cx="120.8" cy="158.8" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="281.7" cy="142.4" r="4" fill="#ef4444" opacity="0.6"/>
+<circle cx="55.0" cy="160.5" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="340.2" cy="155.0" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="252.4" cy="145.8" r="4" fill="#ef4444" opacity="0.6"/>
+<circle cx="230.5" cy="159.2" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="274.4" cy="108.6" r="4" fill="#ef4444" opacity="0.6"/>
+<circle cx="131.8" cy="155.1" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="87.9" cy="153.7" r="4" fill="#ef4444" opacity="0.6"/>
+<circle cx="91.6" cy="154.7" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="102.5" cy="156.2" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="128.1" cy="139.7" r="4" fill="#ef4444" opacity="0.6"/>
+<circle cx="186.6" cy="154.2" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="197.6" cy="146.7" r="4" fill="#ef4444" opacity="0.6"/>
+<circle cx="168.3" cy="152.8" r="4" fill="#ef4444" opacity="0.6"/>
+<circle cx="113.5" cy="153.9" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="95.2" cy="153.8" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="91.6" cy="154.1" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="289.0" cy="143.2" r="4" fill="#ef4444" opacity="0.6"/>
+<circle cx="241.5" cy="156.2" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="365.8" cy="102.4" r="4" fill="#ef4444" opacity="0.6"/>
+<circle cx="190.3" cy="147.9" r="4" fill="#ef4444" opacity="0.6"/>
+<circle cx="395.0" cy="125.0" r="4" fill="#ef4444" opacity="0.6"/>
+<circle cx="292.6" cy="160.7" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="267.0" cy="165.3" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="58.7" cy="209.4" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="318.2" cy="123.1" r="4" fill="#ef4444" opacity="0.6"/>
+<circle cx="128.1" cy="152.3" r="4" fill="#ef4444" opacity="0.6"/>
+<circle cx="318.2" cy="130.8" r="4" fill="#ef4444" opacity="0.6"/>
+<circle cx="76.9" cy="171.5" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="285.3" cy="158.2" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="248.8" cy="245.0" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="252.4" cy="154.3" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="318.2" cy="113.0" r="4" fill="#ef4444" opacity="0.6"/>
+<circle cx="175.6" cy="157.1" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="91.6" cy="152.9" r="4" fill="#ef4444" opacity="0.6"/>
+<circle cx="98.9" cy="154.6" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="124.5" cy="151.8" r="4" fill="#ef4444" opacity="0.6"/>
+<circle cx="142.7" cy="139.6" r="4" fill="#ef4444" opacity="0.6"/>
+<circle cx="230.5" cy="157.8" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="234.1" cy="142.9" r="4" fill="#ef4444" opacity="0.6"/>
+<circle cx="179.3" cy="149.7" r="4" fill="#ef4444" opacity="0.6"/>
+<circle cx="168.3" cy="160.0" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="204.9" cy="172.6" r="4" fill="#22c55e" opacity="0.6"/>
+<circle cx="91.6" cy="155.5" r="4" fill="#22c55e" opacity="0.6"/>
+<text x="225" y="295" text-anchor="middle" fill="#94a3b8" font-size="11">&Delta; Windows (Iter1 - Baseline)</text>
+<text x="12" y="150" text-anchor="middle" fill="#94a3b8" font-size="11" transform="rotate(-90,12,150)">&Delta; MAE (mg/dL)</text>
+</svg></div>
+
+<h2>5. Newly Recovered Samples (13)</h2>
+<p style="color:#94a3b8;">These samples failed in baseline but succeeded in Iteration 1.</p>
+<table>
+    <tr><th>Person</th><th>Date</th><th>Time</th><th>PPG</th><th>Ref</th><th>Pred</th><th>Error</th><th>MARD</th><th>Windows</th></tr>
+    <tr>
+        <td class="left">Akshaya</td><td>24_12_2025</td><td>14_41</td><td>Red</td>
+        <td>102</td><td>204.3</td>
+        <td class="bad">+102.3</td><td>100.3%</td><td>80</td>
+    </tr>
+    <tr>
+        <td class="left">Akshaya</td><td>24_12_2025</td><td>19_07</td><td>Red</td>
+        <td>112</td><td>171.4</td>
+        <td class="bad">+59.4</td><td>53.0%</td><td>64</td>
+    </tr>
+    <tr>
+        <td class="left">Akshaya</td><td>25_12_2025</td><td>15_39</td><td>Red</td>
+        <td>111</td><td>162.3</td>
+        <td class="bad">+51.3</td><td>46.2%</td><td>77</td>
+    </tr>
+    <tr>
+        <td class="left">Akshaya</td><td>26_12_2025</td><td>18_41</td><td>Red</td>
+        <td>110</td><td>183.3</td>
+        <td class="bad">+73.3</td><td>66.6%</td><td>92</td>
+    </tr>
+    <tr>
+        <td class="left">Vikram</td><td>24_12_2025</td><td>15_23</td><td>Red</td>
+        <td>164</td><td>270.6</td>
+        <td class="bad">+106.6</td><td>65.0%</td><td>90</td>
+    </tr>
+    <tr>
+        <td class="left">Akshaya</td><td>22_12_2025</td><td>20_34</td><td>IR</td>
+        <td>151</td><td>140.0</td>
+        <td class="good">-11.0</td><td>7.3%</td><td>76</td>
+    </tr>
+    <tr>
+        <td class="left">Akshaya</td><td>22_12_2025</td><td>20_54</td><td>IR</td>
+        <td>113</td><td>136.3</td>
+        <td class="warn">+23.3</td><td>20.6%</td><td>47</td>
+    </tr>
+    <tr>
+        <td class="left">Akshaya</td><td>24_12_2025</td><td>14_41</td><td>IR</td>
+        <td>102</td><td>143.8</td>
+        <td class="bad">+41.8</td><td>41.0%</td><td>80</td>
+    </tr>
+    <tr>
+        <td class="left">Akshaya</td><td>24_12_2025</td><td>19_07</td><td>IR</td>
+        <td>112</td><td>133.1</td>
+        <td class="warn">+21.1</td><td>18.8%</td><td>64</td>
+    </tr>
+    <tr>
+        <td class="left">Akshaya</td><td>25_12_2025</td><td>14_33</td><td>IR</td>
+        <td>118</td><td>149.7</td>
+        <td class="warn">+31.7</td><td>26.9%</td><td>67</td>
+    </tr>
+    <tr>
+        <td class="left">Akshaya</td><td>25_12_2025</td><td>15_39</td><td>IR</td>
+        <td>111</td><td>138.7</td>
+        <td class="warn">+27.7</td><td>25.0%</td><td>79</td>
+    </tr>
+    <tr>
+        <td class="left">Vikram</td><td>24_12_2025</td><td>14_19</td><td>IR</td>
+        <td>83</td><td>142.8</td>
+        <td class="bad">+59.8</td><td>72.0%</td><td>58</td>
+    </tr>
+    <tr>
+        <td class="left">Vikram</td><td>24_12_2025</td><td>15_23</td><td>IR</td>
+        <td>164</td><td>260.0</td>
+        <td class="bad">+96.0</td><td>58.5%</td><td>90</td>
+    </tr></table>
+<div class="insight-box">
+    <p>Recovered samples have MAE = <b>54.3 mg/dL</b>. These are <b>worse than average</b>, suggesting these recordings have fundamental quality issues beyond the single-peak filter.</p></div>
+<h2>6. Regressed Samples (9)</h2>
+<p style="color:#94a3b8;">These samples were OK in baseline but failed in Iteration 1.</p>
+<table>
+    <tr><th>Person</th><th>Date</th><th>Time</th><th>PPG</th><th>Ref</th><th>Baseline Pred</th><th>Baseline Error</th></tr>
+    <tr>
+        <td class="left">Akshaya</td><td>23_12_2025</td><td>16_38</td><td>Red</td>
+        <td>112</td><td>118.8</td><td>+6.8</td>
+    </tr>
+    <tr>
+        <td class="left">Akshaya</td><td>23_12_2025</td><td>16_41</td><td>Red</td>
+        <td>112</td><td>109.7</td><td>-2.3</td>
+    </tr>
+    <tr>
+        <td class="left">Logesh</td><td>23_12_2025</td><td>19_04</td><td>Red</td>
+        <td>103</td><td>156.0</td><td>+53.0</td>
+    </tr>
+    <tr>
+        <td class="left">Logesh</td><td>25_12_2025</td><td>11_00</td><td>Red</td>
+        <td>119</td><td>135.3</td><td>+16.3</td>
+    </tr>
+    <tr>
+        <td class="left">Mks</td><td>23_12_2025</td><td>18_46</td><td>Red</td>
+        <td>169</td><td>133.3</td><td>-35.7</td>
+    </tr>
+    <tr>
+        <td class="left">Akshaya</td><td>23_12_2025</td><td>16_38</td><td>IR</td>
+        <td>112</td><td>162.3</td><td>+50.3</td>
+    </tr>
+    <tr>
+        <td class="left">Akshaya</td><td>23_12_2025</td><td>16_41</td><td>IR</td>
+        <td>112</td><td>128.2</td><td>+16.2</td>
+    </tr>
+    <tr>
+        <td class="left">Logesh</td><td>25_12_2025</td><td>11_00</td><td>IR</td>
+        <td>119</td><td>131.3</td><td>+12.3</td>
+    </tr>
+    <tr>
+        <td class="left">Mks</td><td>23_12_2025</td><td>18_46</td><td>IR</td>
+        <td>169</td><td>119.1</td><td>-49.9</td>
+    </tr></table>
+<h2>7. Per-Person Comparison</h2>
+<div class="chart-container"><svg viewBox="0 0 700 482" xmlns="http://www.w3.org/2000/svg" style="font-family:Segoe UI,sans-serif;">
+<rect width="700" height="482" fill="#1e293b" rx="8"/>
+<rect x="150" y="10" width="12" height="12" fill="#94a3b8" rx="2"/>
+<text x="166" y="21" fill="#94a3b8" font-size="11">Baseline</text>
+<rect x="260" y="10" width="12" height="12" fill="#667eea" rx="2"/>
+<text x="276" y="21" fill="#667eea" font-size="11">Iteration 1</text>
+<text x="135" y="57" text-anchor="end" fill="#e2e8f0" font-size="11">Akshaya</text>
+<rect x="140" y="35" width="85.4" height="18" fill="#94a3b8" rx="3" opacity="0.6"/>
+<text x="229.39505070898346" y="48" fill="#94a3b8" font-size="10">26.1</text>
+<rect x="140" y="53" width="140.9" height="18" fill="#667eea" rx="3" opacity="0.8"/>
+<text x="284.8747109100466" y="66" fill="#667eea" font-size="10">43.1</text>
+<text x="135" y="101" text-anchor="end" fill="#e2e8f0" font-size="11">Logesh</text>
+<rect x="140" y="79" width="103.8" height="18" fill="#94a3b8" rx="3" opacity="0.6"/>
+<text x="247.81663972209213" y="92" fill="#94a3b8" font-size="10">31.7</text>
+<rect x="140" y="97" width="104.1" height="18" fill="#667eea" rx="3" opacity="0.8"/>
+<text x="248.10363922332445" y="110" fill="#667eea" font-size="10">31.8</text>
+<text x="135" y="145" text-anchor="end" fill="#e2e8f0" font-size="11">Mks</text>
+<rect x="140" y="123" width="238.8" height="18" fill="#94a3b8" rx="3" opacity="0.6"/>
+<text x="382.82575255507084" y="136" fill="#94a3b8" font-size="10">73.0</text>
+<rect x="140" y="141" width="318.2" height="18" fill="#667eea" rx="3" opacity="0.8"/>
+<text x="462.1818181818182" y="154" fill="#667eea" font-size="10">97.3</text>
+<text x="135" y="189" text-anchor="end" fill="#e2e8f0" font-size="11">Rohan</text>
+<rect x="140" y="167" width="194.1" height="18" fill="#94a3b8" rx="3" opacity="0.6"/>
+<text x="338.14594511015935" y="180" fill="#94a3b8" font-size="10">59.4</text>
+<rect x="140" y="185" width="158.8" height="18" fill="#667eea" rx="3" opacity="0.8"/>
+<text x="302.79951080995323" y="198" fill="#667eea" font-size="10">48.5</text>
+<text x="135" y="233" text-anchor="end" fill="#e2e8f0" font-size="11">Rohit</text>
+<rect x="140" y="211" width="80.0" height="18" fill="#94a3b8" rx="3" opacity="0.6"/>
+<text x="224.03730144158425" y="224" fill="#94a3b8" font-size="10">24.5</text>
+<rect x="140" y="229" width="89.7" height="18" fill="#667eea" rx="3" opacity="0.8"/>
+<text x="233.66250645850442" y="242" fill="#667eea" font-size="10">27.4</text>
+<text x="135" y="277" text-anchor="end" fill="#e2e8f0" font-size="11">Subudhi</text>
+<rect x="140" y="255" width="59.5" height="18" fill="#94a3b8" rx="3" opacity="0.6"/>
+<text x="203.54064563069988" y="268" fill="#94a3b8" font-size="10">18.2</text>
+<rect x="140" y="273" width="68.6" height="18" fill="#667eea" rx="3" opacity="0.8"/>
+<text x="212.56429736455368" y="286" fill="#667eea" font-size="10">21.0</text>
+<text x="135" y="321" text-anchor="end" fill="#e2e8f0" font-size="11">Sudha</text>
+<rect x="140" y="299" width="55.0" height="18" fill="#94a3b8" rx="3" opacity="0.6"/>
+<text x="198.99503915748252" y="312" fill="#94a3b8" font-size="10">16.8</text>
+<rect x="140" y="317" width="47.7" height="18" fill="#667eea" rx="3" opacity="0.8"/>
+<text x="191.70922118979158" y="330" fill="#667eea" font-size="10">14.6</text>
+<text x="135" y="365" text-anchor="end" fill="#e2e8f0" font-size="11">Vikram</text>
+<rect x="140" y="343" width="186.7" height="18" fill="#94a3b8" rx="3" opacity="0.6"/>
+<text x="330.67008315783033" y="356" fill="#94a3b8" font-size="10">57.1</text>
+<rect x="140" y="361" width="265.4" height="18" fill="#667eea" rx="3" opacity="0.8"/>
+<text x="409.4258650816726" y="374" fill="#667eea" font-size="10">81.1</text>
+</svg></div>
+<table>
+    <tr><th>Person</th><th colspan="2">N Samples</th><th colspan="2">MAE</th><th>&Delta;MAE</th><th colspan="2">Avg Windows</th><th colspan="2">Zone A</th></tr>
+    <tr><th></th><th>Base</th><th>Iter1</th><th>Base</th><th>Iter1</th><th></th><th>Base</th><th>Iter1</th><th>Base</th><th>Iter1</th></tr>
+    <tr>
+        <td class="left"><b>Rohan</b></td>
+        <td>4</td><td>4</td>
+        <td>59.4</td>
+        <td>48.5</td>
+        <td class="good">-10.8</td>
+        <td>3</td>
+        <td>56</td>
+        <td>0%</td>
+        <td>0%</td>
+    </tr>
+    <tr>
+        <td class="left"><b>Sudha</b></td>
+        <td>6</td><td>6</td>
+        <td>16.8</td>
+        <td>14.6</td>
+        <td class="good">-2.2</td>
+        <td>50</td>
+        <td>61</td>
+        <td>67%</td>
+        <td>67%</td>
+    </tr>
+    <tr>
+        <td class="left"><b>Logesh</b></td>
+        <td>13</td><td>10</td>
+        <td>31.7</td>
+        <td>31.8</td>
+        <td class="bad">+0.1</td>
+        <td>12</td>
+        <td>53</td>
+        <td>38%</td>
+        <td>40%</td>
+    </tr>
+    <tr>
+        <td class="left"><b>Subudhi</b></td>
+        <td>4</td><td>4</td>
+        <td>18.2</td>
+        <td>21.0</td>
+        <td class="bad">+2.8</td>
+        <td>36</td>
+        <td>65</td>
+        <td>100%</td>
+        <td>75%</td>
+    </tr>
+    <tr>
+        <td class="left"><b>Rohit</b></td>
+        <td>16</td><td>16</td>
+        <td>24.5</td>
+        <td>27.4</td>
+        <td class="bad">+2.9</td>
+        <td>33</td>
+        <td>54</td>
+        <td>75%</td>
+        <td>75%</td>
+    </tr>
+    <tr>
+        <td class="left"><b>Akshaya</b></td>
+        <td>14</td><td>20</td>
+        <td>26.1</td>
+        <td>43.1</td>
+        <td class="bad">+17.0</td>
+        <td>15</td>
+        <td>72</td>
+        <td>57%</td>
+        <td>20%</td>
+    </tr>
+    <tr>
+        <td class="left"><b>Vikram</b></td>
+        <td>1</td><td>4</td>
+        <td>57.1</td>
+        <td>81.1</td>
+        <td class="bad">+24.1</td>
+        <td>2</td>
+        <td>74</td>
+        <td>0%</td>
+        <td>0%</td>
+    </tr>
+    <tr>
+        <td class="left"><b>Mks</b></td>
+        <td>4</td><td>2</td>
+        <td>73.0</td>
+        <td>97.3</td>
+        <td class="bad">+24.3</td>
+        <td>9</td>
+        <td>8</td>
+        <td>0%</td>
+        <td>0%</td>
+    </tr>
+</table>
+
+<h2>8. Conclusion</h2>
+<div class="insight-box">
+    <h3>Impact of Skipping Single-Peak Check</h3>
+    <ul>
+        <li><b>Success rate:</b> 62 &rarr; 66 samples (+4 change, 13 recovered, 9 regressed)</li>
+        <li><b>MAE:</b> 31.1 &rarr; 37.9 mg/dL (<span class="bad">+6.8</span>)</li>
+        <li><b>Zone A:</b> 53.2% &rarr; 40.9% (-12.3pp)</li>
+        <li><b>Windows per sample:</b> 22 &rarr; 61 (+38)</li>
+        <li>Of 53 matched samples: <span class="good">28 improved</span>, <span class="bad">24 worsened</span>, 1 unchanged</li>
+    </ul>
+    <p style="margin-top:12px;"><b>Overall verdict:</b> Skipping the single-peak check <span class="bad">worsened</span> accuracy.
+    While it recovered 13 previously-failed samples, the additional multi-peak windows added noise that
+    degraded predictions on average. The single-peak filter acts as a quality gate that, despite reducing window count,
+    ensures cleaner PPG morphology for prediction.</p>
+</div>
+
+<footer>
+    Batch 1 Red + IR PPG | Baseline (with single-peak) vs Iteration 1 (skip single-peak)
+</footer>
+</body></html>

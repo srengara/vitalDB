@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Extreme Case Analysis</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0f0f23; color: #e2e8f0; line-height: 1.6; padding: 30px; }
+h1 { text-align: center; font-size: 2em; background: linear-gradient(135deg, #f97316, #ef4444); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px; }
+.subtitle { text-align: center; color: #94a3b8; margin-bottom: 30px; font-size: 0.95em; }
+h2 { color: #f97316; border-bottom: 2px solid #f9731640; padding-bottom: 8px; margin: 35px 0 20px; font-size: 1.4em; }
+h3 { color: #fb923c; margin: 20px 0 12px; font-size: 1.1em; }
+
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin: 20px 0; }
+.case-card { background: #1e293b; border-radius: 12px; padding: 24px; border-left: 4px solid; }
+.case-card.best { border-color: #22c55e; }
+.case-card.worst { border-color: #ef4444; }
+.case-card h3 { margin-top: 0; }
+.case-card .label { color: #94a3b8; font-size: 0.85em; }
+.case-card .value { font-size: 1.1em; font-weight: 600; }
+.case-card .big-value { font-size: 2.2em; font-weight: 700; line-height: 1.2; }
+.case-card .good { color: #22c55e; }
+.case-card .bad { color: #ef4444; }
+.case-card .neutral { color: #f97316; }
+
+.metric-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #334155; }
+.metric-row:last-child { border-bottom: none; }
+
+table { width: 100%; border-collapse: collapse; margin: 15px 0; background: #1e293b; border-radius: 8px; overflow: hidden; font-size: 0.88em; }
+th { background: #334155; padding: 10px 12px; text-align: center; color: #e2e8f0; font-weight: 600; }
+td { padding: 8px 12px; text-align: center; border-bottom: 1px solid #334155; }
+tr:hover { background: #334155aa; }
+td.left { text-align: left; }
+.good { color: #22c55e; }
+.warn { color: #f59e0b; }
+.bad { color: #ef4444; }
+.highlight-best { background: #22c55e15; }
+.highlight-worst { background: #ef444415; }
+
+.insight-box { background: #1e293b; border: 1px solid #f9731640; border-radius: 12px; padding: 20px 24px; margin: 20px 0; }
+.insight-box h3 { color: #f97316; margin-top: 0; }
+.insight-box ul { margin-left: 20px; }
+.insight-box li { margin-bottom: 8px; }
+
+.chart-container { text-align: center; margin: 20px 0; overflow-x: auto; }
+.chart-container svg { max-width: 100%; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+.tag { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.8em; font-weight: 600; }
+.tag-best { background: #22c55e30; color: #22c55e; }
+.tag-worst { background: #ef444430; color: #ef4444; }
+
+footer { text-align: center; color: #475569; margin-top: 40px; font-size: 0.8em; padding-top: 20px; border-top: 1px solid #334155; }
+</style>
+</head><body>
+
+<h1>Extreme Case Comparison Analysis</h1>
+<p class="subtitle">Why does the same model achieve 0.1 mg/dL error for one sample and 129.5 mg/dL for another?</p>
+
+<!-- ===== SECTION 1: HEAD-TO-HEAD ===== -->
+<h2>1. Head-to-Head Comparison</h2>
+
+<div class="card-grid">
+    <div class="case-card best">
+        <h3><span class="tag tag-best">BEST</span> Pramod</h3>
+        <div class="big-value good">0.1 <span style="font-size:0.4em">mg/dL error</span></div>
+        <div style="margin-top: 12px;">
+            <div class="metric-row"><span class="label">Date / Time</span><span class="value">31_12_2025 19_45</span></div>
+            <div class="metric-row"><span class="label">Batch / PPG</span><span class="value">Batch 2 Red</span></div>
+            <div class="metric-row"><span class="label">Ref Glucose</span><span class="value">115 mg/dL</span></div>
+            <div class="metric-row"><span class="label">Predicted</span><span class="value good">114.9 mg/dL</span></div>
+            <div class="metric-row"><span class="label">Heart Rate</span><span class="value">86 bpm</span></div>
+            <div class="metric-row"><span class="label">Blood Pressure</span><span class="value">122/85 mmHg</span></div>
+            <div class="metric-row"><span class="label">Accepted Windows</span><span class="value">2</span></div>
+            <div class="metric-row"><span class="label">Mean Similarity</span><span class="value">0.743</span></div>
+            <div class="metric-row"><span class="label">Pred Std</span><span class="value">11.1</span></div>
+            <div class="metric-row"><span class="label">Pred Range</span><span class="value">104 &ndash; 126</span></div>
+        </div>
+    </div>
+
+    <div class="case-card worst">
+        <h3><span class="tag tag-worst">WORST</span> Vikraman</h3>
+        <div class="big-value bad">129.5 <span style="font-size:0.4em">mg/dL error</span></div>
+        <div style="margin-top: 12px;">
+            <div class="metric-row"><span class="label">Date / Time</span><span class="value">31_12_2025 11_49</span></div>
+            <div class="metric-row"><span class="label">Batch / PPG</span><span class="value">Batch 2 Red</span></div>
+            <div class="metric-row"><span class="label">Ref Glucose</span><span class="value">102 mg/dL</span></div>
+            <div class="metric-row"><span class="label">Predicted</span><span class="value bad">231.5 mg/dL</span></div>
+            <div class="metric-row"><span class="label">Heart Rate</span><span class="value bad">104 bpm</span></div>
+            <div class="metric-row"><span class="label">Blood Pressure</span><span class="value bad">143/104 mmHg</span></div>
+            <div class="metric-row"><span class="label">Accepted Windows</span><span class="value">25</span></div>
+            <div class="metric-row"><span class="label">Mean Similarity</span><span class="value">0.967</span></div>
+            <div class="metric-row"><span class="label">Pred Std</span><span class="value">25.0</span></div>
+            <div class="metric-row"><span class="label">Pred Range</span><span class="value">173 &ndash; 287</span></div>
+        </div>
+    </div>
+</div>
+
+<div class="chart-container"><svg viewBox="0 0 700 430" xmlns="http://www.w3.org/2000/svg" style="font-family:Segoe UI,sans-serif;">
+<rect width="700" height="430" fill="#1e293b" rx="8"/>
+<text x="350" y="25" text-anchor="middle" fill="#94a3b8" font-size="13">Side-by-Side Comparison</text>
+<rect x="250" y="35" width="12" height="12" fill="#22c55e" rx="2"/>
+<text x="266" y="46" fill="#94a3b8" font-size="11">Best</text>
+<rect x="370" y="35" width="12" height="12" fill="#ef4444" rx="2"/>
+<text x="386" y="46" fill="#94a3b8" font-size="11">Worst</text>
+<text x="40" y="81" fill="#e2e8f0" font-size="12">Ref Glucose</text>
+<rect x="200" y="67" width="200.0" height="14" fill="#22c55e" rx="3" opacity="0.8"/>
+<text x="405.0" y="79" fill="#22c55e" font-size="11">115.0 mg/dL</text>
+<rect x="200" y="83" width="177.4" height="14" fill="#ef4444" rx="3" opacity="0.8"/>
+<text x="382.3913043478261" y="95" fill="#ef4444" font-size="11">102.0 mg/dL</text>
+<text x="40" y="121" fill="#e2e8f0" font-size="12">Predicted</text>
+<rect x="200" y="107" width="99.2" height="14" fill="#22c55e" rx="3" opacity="0.8"/>
+<text x="304.24513900691545" y="119" fill="#22c55e" font-size="11">114.9 mg/dL</text>
+<rect x="200" y="123" width="200.0" height="14" fill="#ef4444" rx="3" opacity="0.8"/>
+<text x="405.0" y="135" fill="#ef4444" font-size="11">231.5 mg/dL</text>
+<text x="40" y="161" fill="#e2e8f0" font-size="12">Heart Rate</text>
+<rect x="200" y="147" width="165.4" height="14" fill="#22c55e" rx="3" opacity="0.8"/>
+<text x="370.38461538461536" y="159" fill="#22c55e" font-size="11">86.0 bpm</text>
+<rect x="200" y="163" width="200.0" height="14" fill="#ef4444" rx="3" opacity="0.8"/>
+<text x="405.0" y="175" fill="#ef4444" font-size="11">104.0 bpm</text>
+<text x="40" y="201" fill="#e2e8f0" font-size="12">Systolic BP</text>
+<rect x="200" y="187" width="170.6" height="14" fill="#22c55e" rx="3" opacity="0.8"/>
+<text x="375.6293706293706" y="199" fill="#22c55e" font-size="11">122.0 mmHg</text>
+<rect x="200" y="203" width="200.0" height="14" fill="#ef4444" rx="3" opacity="0.8"/>
+<text x="405.0" y="215" fill="#ef4444" font-size="11">143.0 mmHg</text>
+<text x="40" y="241" fill="#e2e8f0" font-size="12">Diastolic BP</text>
+<rect x="200" y="227" width="163.5" height="14" fill="#22c55e" rx="3" opacity="0.8"/>
+<text x="368.46153846153845" y="239" fill="#22c55e" font-size="11">85.0 mmHg</text>
+<rect x="200" y="243" width="200.0" height="14" fill="#ef4444" rx="3" opacity="0.8"/>
+<text x="405.0" y="255" fill="#ef4444" font-size="11">104.0 mmHg</text>
+<text x="40" y="281" fill="#e2e8f0" font-size="12">Accepted Windows</text>
+<rect x="200" y="267" width="16.0" height="14" fill="#22c55e" rx="3" opacity="0.8"/>
+<text x="221.0" y="279" fill="#22c55e" font-size="11">2.0 </text>
+<rect x="200" y="283" width="200.0" height="14" fill="#ef4444" rx="3" opacity="0.8"/>
+<text x="405.0" y="295" fill="#ef4444" font-size="11">25.0 </text>
+<text x="40" y="321" fill="#e2e8f0" font-size="12">Mean Similarity</text>
+<rect x="200" y="307" width="153.7" height="14" fill="#22c55e" rx="3" opacity="0.8"/>
+<text x="358.73410935792265" y="319" fill="#22c55e" font-size="11">0.7 </text>
+<rect x="200" y="323" width="200.0" height="14" fill="#ef4444" rx="3" opacity="0.8"/>
+<text x="405.0" y="335" fill="#ef4444" font-size="11">1.0 </text>
+<text x="40" y="361" fill="#e2e8f0" font-size="12">Pred Std</text>
+<rect x="200" y="347" width="88.6" height="14" fill="#22c55e" rx="3" opacity="0.8"/>
+<text x="293.64242885191175" y="359" fill="#22c55e" font-size="11">11.1 mg/dL</text>
+<rect x="200" y="363" width="200.0" height="14" fill="#ef4444" rx="3" opacity="0.8"/>
+<text x="405.0" y="375" fill="#ef4444" font-size="11">25.0 mg/dL</text>
+</svg></div>
+
+<!-- ===== SECTION 2: KEY DIFFERENCES ===== -->
+<h2>2. Key Differences</h2>
+<table>
+    <tr><th>Parameter</th><th class="good">Best (Pramod)</th><th class="bad">Worst (Vikraman)</th><th>Difference</th><th>Implication</th></tr>
+    <tr>
+        <td class="left"><b>Heart Rate</b></td>
+        <td>86 bpm</td>
+        <td class="bad">104 bpm</td>
+        <td>+18 bpm</td>
+        <td class="left">Tachycardia compresses diastolic phase, altering PPG morphology</td>
+    </tr>
+    <tr>
+        <td class="left"><b>Systolic BP</b></td>
+        <td>122 mmHg</td>
+        <td class="bad">143 mmHg</td>
+        <td>+21 mmHg</td>
+        <td class="left">Hypertension increases vascular stiffness &rarr; stiffer pulse wave</td>
+    </tr>
+    <tr>
+        <td class="left"><b>Diastolic BP</b></td>
+        <td>85 mmHg</td>
+        <td class="bad">104 mmHg</td>
+        <td>+19 mmHg</td>
+        <td class="left">Elevated diastolic = sustained vascular resistance</td>
+    </tr>
+    <tr>
+        <td class="left"><b>Accepted Windows</b></td>
+        <td>2</td>
+        <td>25</td>
+        <td>+23</td>
+        <td class="left">More windows does NOT mean better accuracy</td>
+    </tr>
+    <tr>
+        <td class="left"><b>Mean Similarity</b></td>
+        <td>0.743</td>
+        <td>0.967</td>
+        <td>+0.224</td>
+        <td class="left">High consistency + wrong = systematic bias, not noise</td>
+    </tr>
+    <tr>
+        <td class="left"><b>Ref Glucose</b></td>
+        <td>115 mg/dL</td>
+        <td>102 mg/dL</td>
+        <td>-13 mg/dL</td>
+        <td class="left">Both in normal range &mdash; glucose level is NOT the problem</td>
+    </tr>
+</table>
+
+<!-- ===== SECTION 3: CARDIOVASCULAR CONFOUNDING ===== -->
+<h2>3. Cardiovascular Confounding Evidence</h2>
+
+<div class="insight-box">
+    <h3>Core Finding: Blood Pressure and Heart Rate Drive Prediction Error</h3>
+    <p>The model was trained on VitalDB surgical ICU data where hemodynamic instability (high HR, high BP, stiff vasculature)
+    co-occurs with hyperglycemia. When applied to ambulatory subjects, it mistakes <b>cardiovascular-driven PPG features</b>
+    for <b>glucose-driven optical absorption changes</b>.</p>
+</div>
+
+<div class="two-col">
+    <div class="chart-container"><svg viewBox="0 0 450 350" xmlns="http://www.w3.org/2000/svg" style="font-family:Segoe UI,sans-serif;">
+<rect width="450" height="350" fill="#1e293b" rx="8"/>
+<line x1="55" y1="295.0" x2="395" y2="295.0" stroke="#334155" stroke-width="0.5"/>
+<text x="50" y="299.0" text-anchor="end" fill="#64748b" font-size="10">0</text>
+<line x1="55" y1="235.0" x2="395" y2="235.0" stroke="#334155" stroke-width="0.5"/>
+<text x="50" y="239.0" text-anchor="end" fill="#64748b" font-size="10">36</text>
+<line x1="55" y1="175.0" x2="395" y2="175.0" stroke="#334155" stroke-width="0.5"/>
+<text x="50" y="179.0" text-anchor="end" fill="#64748b" font-size="10">71</text>
+<line x1="55" y1="115.0" x2="395" y2="115.0" stroke="#334155" stroke-width="0.5"/>
+<text x="50" y="119.0" text-anchor="end" fill="#64748b" font-size="10">107</text>
+<line x1="55" y1="55.0" x2="395" y2="55.0" stroke="#334155" stroke-width="0.5"/>
+<text x="50" y="59.0" text-anchor="end" fill="#64748b" font-size="10">142</text>
+<line x1="55.0" y1="55" x2="55.0" y2="295" stroke="#334155" stroke-width="0.5"/>
+<text x="55.0" y="310" text-anchor="middle" fill="#64748b" font-size="10">56</text>
+<line x1="140.0" y1="55" x2="140.0" y2="295" stroke="#334155" stroke-width="0.5"/>
+<text x="140.0" y="310" text-anchor="middle" fill="#64748b" font-size="10">73</text>
+<line x1="225.0" y1="55" x2="225.0" y2="295" stroke="#334155" stroke-width="0.5"/>
+<text x="225.0" y="310" text-anchor="middle" fill="#64748b" font-size="10">89</text>
+<line x1="310.0" y1="55" x2="310.0" y2="295" stroke="#334155" stroke-width="0.5"/>
+<text x="310.0" y="310" text-anchor="middle" fill="#64748b" font-size="10">106</text>
+<line x1="395.0" y1="55" x2="395.0" y2="295" stroke="#334155" stroke-width="0.5"/>
+<text x="395.0" y="310" text-anchor="middle" fill="#64748b" font-size="10">123</text>
+<circle cx="258.3" cy="190.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="248.2" cy="245.0" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="248.2" cy="248.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="253.2" cy="215.0" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="243.1" cy="291.8" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="156.5" cy="283.5" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="156.5" cy="291.1" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="258.3" cy="274.5" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="212.5" cy="191.2" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="115.8" cy="209.1" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="182.0" cy="205.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="166.7" cy="267.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="192.2" cy="289.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="90.4" cy="247.0" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="182.0" cy="234.9" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="192.2" cy="116.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="126.0" cy="195.5" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="146.4" cy="230.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="309.2" cy="253.2" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="161.6" cy="143.5" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="207.4" cy="291.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="227.8" cy="278.2" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="212.5" cy="284.2" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="232.9" cy="262.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="212.5" cy="215.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="151.5" cy="290.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="182.0" cy="267.8" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="146.4" cy="263.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="141.3" cy="290.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="197.3" cy="246.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="197.3" cy="281.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="324.5" cy="198.9" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="258.3" cy="210.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="253.2" cy="232.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="243.1" cy="285.5" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="156.5" cy="210.2" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="156.5" cy="267.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="314.3" cy="268.1" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="212.5" cy="194.5" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="115.8" cy="186.8" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="182.0" cy="244.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="115.8" cy="288.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="166.7" cy="274.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="192.2" cy="292.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="90.4" cy="248.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="182.0" cy="210.9" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="192.2" cy="125.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="126.0" cy="202.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="146.4" cy="151.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="309.2" cy="262.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="161.6" cy="168.5" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="207.4" cy="291.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="227.8" cy="267.1" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="212.5" cy="280.9" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="232.9" cy="269.0" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="212.5" cy="215.2" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="151.5" cy="287.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="182.0" cy="270.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="146.4" cy="255.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="141.3" cy="276.9" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="197.3" cy="219.8" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="197.3" cy="284.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="192.2" cy="282.8" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="197.3" cy="275.1" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="115.8" cy="279.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="166.7" cy="194.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="238.0" cy="224.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="192.2" cy="225.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="197.3" cy="239.0" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="90.4" cy="267.1" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="151.5" cy="185.1" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="171.8" cy="270.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="166.7" cy="215.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="248.2" cy="224.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="283.8" cy="247.9" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="207.4" cy="216.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="161.6" cy="215.8" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="243.1" cy="271.1" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="207.4" cy="262.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="212.5" cy="249.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="207.4" cy="294.8" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="232.9" cy="252.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="253.2" cy="267.2" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="187.1" cy="213.2" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="273.6" cy="119.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="278.7" cy="256.0" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="171.8" cy="294.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="146.4" cy="289.1" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="156.5" cy="282.0" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="70.0" cy="288.5" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="95.5" cy="258.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="171.8" cy="275.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="192.2" cy="268.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="365.2" cy="245.1" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="299.1" cy="76.8" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="192.2" cy="239.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="161.6" cy="205.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="197.3" cy="272.2" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="166.7" cy="208.5" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="238.0" cy="243.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="192.2" cy="237.9" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="197.3" cy="239.2" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="90.4" cy="278.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="151.5" cy="199.9" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="171.8" cy="278.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="166.7" cy="231.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="248.2" cy="167.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="283.8" cy="271.0" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="207.4" cy="222.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="243.1" cy="259.9" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="207.4" cy="255.8" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="207.4" cy="210.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="232.9" cy="261.9" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="253.2" cy="287.1" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="187.1" cy="268.1" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="273.6" cy="166.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="278.7" cy="283.9" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="171.8" cy="281.9" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="146.4" cy="274.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="156.5" cy="284.2" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="70.0" cy="277.0" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="95.5" cy="230.1" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="171.8" cy="286.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="192.2" cy="249.9" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="365.2" cy="217.8" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="299.1" cy="113.2" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="207.4" cy="294.8" r="8" fill="none" stroke="#22c55e" stroke-width="2.5"/>
+<circle cx="207.4" cy="294.8" r="4" fill="#22c55e"/>
+<text x="219.4" y="298.8" fill="#22c55e" font-size="10" font-weight="600">Pramod</text>
+<circle cx="299.1" cy="76.8" r="8" fill="none" stroke="#ef4444" stroke-width="2.5"/>
+<circle cx="299.1" cy="76.8" r="4" fill="#ef4444"/>
+<text x="311.1" y="80.8" fill="#ef4444" font-size="10" font-weight="600">Vikraman</text>
+<text x="225" y="345" text-anchor="middle" fill="#94a3b8" font-size="12">Heart Rate (bpm)</text>
+<text x="15" y="175" text-anchor="middle" fill="#94a3b8" font-size="12" transform="rotate(-90,15,175)">Absolute Error (mg/dL)</text>
+</svg></div>
+    <div class="chart-container"><svg viewBox="0 0 450 350" xmlns="http://www.w3.org/2000/svg" style="font-family:Segoe UI,sans-serif;">
+<rect width="450" height="350" fill="#1e293b" rx="8"/>
+<line x1="55" y1="295.0" x2="395" y2="295.0" stroke="#334155" stroke-width="0.5"/>
+<text x="50" y="299.0" text-anchor="end" fill="#64748b" font-size="10">0</text>
+<line x1="55" y1="235.0" x2="395" y2="235.0" stroke="#334155" stroke-width="0.5"/>
+<text x="50" y="239.0" text-anchor="end" fill="#64748b" font-size="10">36</text>
+<line x1="55" y1="175.0" x2="395" y2="175.0" stroke="#334155" stroke-width="0.5"/>
+<text x="50" y="179.0" text-anchor="end" fill="#64748b" font-size="10">71</text>
+<line x1="55" y1="115.0" x2="395" y2="115.0" stroke="#334155" stroke-width="0.5"/>
+<text x="50" y="119.0" text-anchor="end" fill="#64748b" font-size="10">107</text>
+<line x1="55" y1="55.0" x2="395" y2="55.0" stroke="#334155" stroke-width="0.5"/>
+<text x="50" y="59.0" text-anchor="end" fill="#64748b" font-size="10">142</text>
+<line x1="55.0" y1="55" x2="55.0" y2="295" stroke="#334155" stroke-width="0.5"/>
+<text x="55.0" y="310" text-anchor="middle" fill="#64748b" font-size="10">94</text>
+<line x1="140.0" y1="55" x2="140.0" y2="295" stroke="#334155" stroke-width="0.5"/>
+<text x="140.0" y="310" text-anchor="middle" fill="#64748b" font-size="10">119</text>
+<line x1="224.99999999999997" y1="55" x2="224.99999999999997" y2="295" stroke="#334155" stroke-width="0.5"/>
+<text x="224.99999999999997" y="310" text-anchor="middle" fill="#64748b" font-size="10">144</text>
+<line x1="310.0" y1="55" x2="310.0" y2="295" stroke="#334155" stroke-width="0.5"/>
+<text x="310.0" y="310" text-anchor="middle" fill="#64748b" font-size="10">168</text>
+<line x1="395.0" y1="55" x2="395.0" y2="295" stroke="#334155" stroke-width="0.5"/>
+<text x="395.0" y="310" text-anchor="middle" fill="#64748b" font-size="10">193</text>
+<circle cx="109.7" cy="190.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="126.8" cy="245.0" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="126.8" cy="248.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="113.1" cy="215.0" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="109.7" cy="291.8" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="126.8" cy="283.5" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="126.8" cy="291.1" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="133.7" cy="274.5" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="147.4" cy="191.2" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="216.0" cy="209.1" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="144.0" cy="205.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="144.0" cy="267.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="116.6" cy="289.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="126.8" cy="247.0" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="312.0" cy="234.9" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="353.2" cy="116.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="205.7" cy="195.5" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="181.7" cy="230.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="178.3" cy="253.2" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="212.6" cy="143.5" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="192.0" cy="291.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="195.4" cy="278.2" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="229.7" cy="284.2" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="198.9" cy="262.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="233.1" cy="215.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="205.7" cy="290.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="164.6" cy="267.8" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="140.6" cy="263.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="147.4" cy="290.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="195.4" cy="246.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="174.8" cy="281.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="212.6" cy="198.9" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="109.7" cy="210.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="113.1" cy="232.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="109.7" cy="285.5" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="126.8" cy="210.2" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="126.8" cy="267.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="150.8" cy="268.1" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="147.4" cy="194.5" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="216.0" cy="186.8" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="144.0" cy="244.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="106.3" cy="288.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="144.0" cy="274.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="116.6" cy="292.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="126.8" cy="248.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="312.0" cy="210.9" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="353.2" cy="125.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="205.7" cy="202.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="181.7" cy="151.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="178.3" cy="262.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="212.6" cy="168.5" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="192.0" cy="291.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="195.4" cy="267.1" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="229.7" cy="280.9" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="198.9" cy="269.0" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="233.1" cy="215.2" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="205.7" cy="287.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="164.6" cy="270.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="140.6" cy="255.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="147.4" cy="276.9" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="195.4" cy="219.8" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="174.8" cy="284.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="123.4" cy="282.8" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="188.6" cy="275.1" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="161.1" cy="279.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="144.0" cy="194.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="164.6" cy="224.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="106.3" cy="225.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="72.0" cy="239.0" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="116.6" cy="267.1" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="318.9" cy="185.1" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="363.5" cy="270.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="305.2" cy="215.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="137.1" cy="224.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="157.7" cy="247.9" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="120.0" cy="216.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="116.6" cy="215.8" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="144.0" cy="271.1" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="89.1" cy="262.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="144.0" cy="249.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="150.8" cy="294.8" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="144.0" cy="252.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="144.0" cy="267.2" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="212.6" cy="213.2" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="205.7" cy="119.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="202.3" cy="256.0" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="226.3" cy="294.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="205.7" cy="289.1" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="116.6" cy="282.0" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="157.7" cy="288.5" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="192.0" cy="258.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="120.0" cy="275.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="164.6" cy="268.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="164.6" cy="245.1" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="222.9" cy="76.8" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="123.4" cy="239.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="133.7" cy="205.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="188.6" cy="272.2" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="144.0" cy="208.5" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="164.6" cy="243.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="106.3" cy="237.9" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="72.0" cy="239.2" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="116.6" cy="278.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="318.9" cy="199.9" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="363.5" cy="278.4" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="305.2" cy="231.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="137.1" cy="167.7" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="157.7" cy="271.0" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="120.0" cy="222.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="144.0" cy="259.9" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="89.1" cy="255.8" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="150.8" cy="210.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="144.0" cy="261.9" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="144.0" cy="287.1" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="212.6" cy="268.1" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="205.7" cy="166.3" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="202.3" cy="283.9" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="226.3" cy="281.9" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="205.7" cy="274.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="116.6" cy="284.2" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="157.7" cy="277.0" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="192.0" cy="230.1" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="120.0" cy="286.6" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="164.6" cy="249.9" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="164.6" cy="217.8" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="222.9" cy="113.2" r="3.5" fill="#f97316" opacity="0.4"/>
+<circle cx="150.8" cy="294.8" r="8" fill="none" stroke="#22c55e" stroke-width="2.5"/>
+<circle cx="150.8" cy="294.8" r="4" fill="#22c55e"/>
+<text x="162.8" y="298.8" fill="#22c55e" font-size="10" font-weight="600">Pramod</text>
+<circle cx="222.9" cy="76.8" r="8" fill="none" stroke="#ef4444" stroke-width="2.5"/>
+<circle cx="222.9" cy="76.8" r="4" fill="#ef4444"/>
+<text x="234.9" y="80.8" fill="#ef4444" font-size="10" font-weight="600">Vikraman</text>
+<text x="225" y="345" text-anchor="middle" fill="#94a3b8" font-size="12">Systolic BP (mmHg)</text>
+<text x="15" y="175" text-anchor="middle" fill="#94a3b8" font-size="12" transform="rotate(-90,15,175)">Absolute Error (mg/dL)</text>
+</svg></div>
+</div>
+
+<h3>Feature Correlations with Absolute Error</h3>
+<div class="chart-container"><svg viewBox="0 0 600 406" xmlns="http://www.w3.org/2000/svg" style="font-family:Segoe UI,sans-serif;">
+<rect width="600" height="406" fill="#1e293b" rx="8"/>
+<line x1="230" y1="40" x2="230" y2="366" stroke="#64748b" stroke-width="1" stroke-dasharray="4,4"/>
+<text x="230" y="35" text-anchor="middle" fill="#64748b" font-size="10">r = 0</text>
+<text x="40" y="69" text-anchor="end" fill="#e2e8f0" font-size="12">pred_std</text>
+<rect x="230.0" y="50" width="64.6" height="28" fill="#ef4444" rx="3" opacity="0.7"/>
+<text x="299.6" y="69" text-anchor="start" fill="#ef4444" font-size="11" font-weight="600">+0.359</text>
+<text x="40" y="103" text-anchor="end" fill="#e2e8f0" font-size="12">systolic</text>
+<rect x="230.0" y="84" width="54.1" height="28" fill="#ef4444" rx="3" opacity="0.7"/>
+<text x="289.1" y="103" text-anchor="start" fill="#ef4444" font-size="11" font-weight="600">+0.301</text>
+<text x="40" y="137" text-anchor="end" fill="#e2e8f0" font-size="12">diastolic</text>
+<rect x="230.0" y="118" width="42.2" height="28" fill="#ef4444" rx="3" opacity="0.7"/>
+<text x="277.2" y="137" text-anchor="start" fill="#ef4444" font-size="11" font-weight="600">+0.235</text>
+<text x="40" y="171" text-anchor="end" fill="#e2e8f0" font-size="12">est_hr</text>
+<rect x="230.0" y="152" width="38.6" height="28" fill="#ef4444" rx="3" opacity="0.7"/>
+<text x="273.6" y="171" text-anchor="start" fill="#ef4444" font-size="11" font-weight="600">+0.215</text>
+<text x="40" y="205" text-anchor="end" fill="#e2e8f0" font-size="12">num_peaks</text>
+<rect x="230.0" y="186" width="34.6" height="28" fill="#ef4444" rx="3" opacity="0.7"/>
+<text x="269.6" y="205" text-anchor="start" fill="#ef4444" font-size="11" font-weight="600">+0.192</text>
+<text x="40" y="239" text-anchor="end" fill="#e2e8f0" font-size="12">hr</text>
+<rect x="230.0" y="220" width="30.1" height="28" fill="#ef4444" rx="3" opacity="0.7"/>
+<text x="265.1" y="239" text-anchor="start" fill="#ef4444" font-size="11" font-weight="600">+0.167</text>
+<text x="40" y="273" text-anchor="end" fill="#e2e8f0" font-size="12">num_windows</text>
+<rect x="200.6" y="254" width="29.4" height="28" fill="#3b82f6" rx="3" opacity="0.7"/>
+<text x="195.6" y="273" text-anchor="end" fill="#3b82f6" font-size="11" font-weight="600">-0.163</text>
+<text x="40" y="307" text-anchor="end" fill="#e2e8f0" font-size="12">mean_similarity</text>
+<rect x="212.1" y="288" width="17.9" height="28" fill="#3b82f6" rx="3" opacity="0.7"/>
+<text x="207.1" y="307" text-anchor="end" fill="#3b82f6" font-size="11" font-weight="600">-0.099</text>
+<text x="40" y="341" text-anchor="end" fill="#e2e8f0" font-size="12">ref_glucose</text>
+<rect x="230.0" y="322" width="3.6" height="28" fill="#ef4444" rx="3" opacity="0.7"/>
+<text x="238.6" y="341" text-anchor="start" fill="#ef4444" font-size="11" font-weight="600">+0.020</text>
+</svg></div>
+
+<table>
+    <tr><th>Feature</th><th>Correlation (r)</th><th>Interpretation</th></tr>
+    <tr><td class="left"><b>pred_std</b></td><td class="bad">+0.359</td><td class="left">Higher prediction spread = larger errors. Model uncertainty is informative.</td></tr>
+    <tr><td class="left"><b>systolic</b></td><td class="bad">+0.301</td><td class="left">Higher systolic BP = larger errors. Strongest cardiovascular confound.</td></tr>
+    <tr><td class="left"><b>diastolic</b></td><td class="warn">+0.235</td><td class="left">Higher diastolic BP = larger errors. Sustained vascular resistance alters PPG shape.</td></tr>
+    <tr><td class="left"><b>est_hr</b></td><td class="warn">+0.215</td><td class="left"></td></tr>
+    <tr><td class="left"><b>num_peaks</b></td><td class="warn">+0.192</td><td class="left"></td></tr>
+    <tr><td class="left"><b>hr</b></td><td class="warn">+0.167</td><td class="left">Higher HR = larger errors. Tachycardia compresses PPG waveform.</td></tr>
+    <tr><td class="left"><b>num_windows</b></td><td class="warn">-0.163</td><td class="left">Weak negative: more windows slightly helps (averaging effect).</td></tr>
+    <tr><td class="left"><b>mean_similarity</b></td><td class="">-0.099</td><td class="left">Similarity does NOT predict accuracy. Consistent signal != correct prediction.</td></tr>
+    <tr><td class="left"><b>ref_glucose</b></td><td class="">+0.020</td><td class="left">Near zero: actual glucose level has NO influence on error magnitude.</td></tr>
+</table>
+
+<!-- ===== SECTION 4: INVERTED RESPONSE ===== -->
+<h2>4. Inverted Model Response for Vikraman</h2>
+
+<div class="insight-box">
+    <h3>The Model Responds Inversely to Glucose for This Subject</h3>
+    <p>Vikraman's actual glucose of <b>179 mg/dL</b> produces a prediction of ~140 (underpredicts by 40),
+    while glucose of <b>102 mg/dL</b> produces a prediction of ~230 (overpredicts by 130).
+    The model's response is <b>inversely</b> correlated with true glucose for this cardiovascular phenotype &mdash;
+    proving it is <b>not tracking glucose</b> but rather hemodynamic-driven PPG shape features.</p>
+</div>
+
+<div class="chart-container"><svg viewBox="0 0 500 300" xmlns="http://www.w3.org/2000/svg" style="font-family:Segoe UI,sans-serif;">
+<rect width="500" height="300" fill="#1e293b" rx="8"/>
+<text x="250" y="20" text-anchor="middle" fill="#f97316" font-size="13" font-weight="600">Vikraman: Actual vs Predicted Glucose</text>
+<line x1="55.0" y1="245.0" x2="445.0" y2="55.0" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.5"/>
+<text x="440.0" y="47.0" text-anchor="end" fill="#22c55e" font-size="10" opacity="0.7">Perfect</text>
+<line x1="55" y1="229.957963773564" x2="445" y2="229.957963773564" stroke="#334155" stroke-width="0.5"/>
+<text x="50" y="233.957963773564" text-anchor="end" fill="#64748b" font-size="10">100</text>
+<line x1="85.87575857005284" y1="55" x2="85.87575857005284" y2="245" stroke="#334155" stroke-width="0.5"/>
+<text x="85.87575857005284" y="260" text-anchor="middle" fill="#64748b" font-size="10">100</text>
+<line x1="55" y1="173.40895540350385" x2="445" y2="173.40895540350385" stroke="#334155" stroke-width="0.5"/>
+<text x="50" y="177.40895540350385" text-anchor="end" fill="#64748b" font-size="10">150</text>
+<line x1="201.95003890859738" y1="55" x2="201.95003890859738" y2="245" stroke="#334155" stroke-width="0.5"/>
+<text x="201.95003890859738" y="260" text-anchor="middle" fill="#64748b" font-size="10">150</text>
+<line x1="55" y1="116.85994703344369" x2="445" y2="116.85994703344369" stroke="#334155" stroke-width="0.5"/>
+<text x="50" y="120.85994703344369" text-anchor="end" fill="#64748b" font-size="10">200</text>
+<line x1="318.0243192471419" y1="55" x2="318.0243192471419" y2="245" stroke="#334155" stroke-width="0.5"/>
+<text x="318.0243192471419" y="260" text-anchor="middle" fill="#64748b" font-size="10">200</text>
+<line x1="55" y1="60.310938663383496" x2="445" y2="60.310938663383496" stroke="#334155" stroke-width="0.5"/>
+<text x="50" y="64.3109386633835" text-anchor="end" fill="#64748b" font-size="10">250</text>
+<line x1="434.0985995856865" y1="55" x2="434.0985995856865" y2="245" stroke="#334155" stroke-width="0.5"/>
+<text x="434.0985995856865" y="260" text-anchor="middle" fill="#64748b" font-size="10">250</text>
+<circle cx="90.5" cy="81.2" r="6" fill="#ef4444" opacity="0.8"/>
+<line x1="90.5" y1="227.7" x2="90.5" y2="81.2" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.5"/>
+<circle cx="90.5" cy="105.6" r="6" fill="#3b82f6" opacity="0.8"/>
+<line x1="90.5" y1="227.7" x2="90.5" y2="105.6" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.5"/>
+<circle cx="269.3" cy="174.1" r="6" fill="#ef4444" opacity="0.8"/>
+<line x1="269.3" y1="140.6" x2="269.3" y2="174.1" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.5"/>
+<circle cx="269.3" cy="192.5" r="6" fill="#3b82f6" opacity="0.8"/>
+<line x1="269.3" y1="140.6" x2="269.3" y2="192.5" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.5"/>
+<text x="250" y="295" text-anchor="middle" fill="#94a3b8" font-size="12">Actual Glucose (mg/dL)</text>
+<text x="12" y="150" text-anchor="middle" fill="#94a3b8" font-size="12" transform="rotate(-90,12,150)">Predicted (mg/dL)</text>
+<rect x="370" y="30" width="10" height="10" fill="#ef4444" rx="2"/>
+<text x="385" y="40" fill="#94a3b8" font-size="10">Red PPG</text>
+<rect x="370" y="46" width="10" height="10" fill="#3b82f6" rx="2"/>
+<text x="385" y="56" fill="#94a3b8" font-size="10">IR PPG</text>
+</svg></div>
+
+<h3>All Vikraman Readings</h3>
+<table>
+    <tr><th>Batch</th><th>PPG</th><th>Date</th><th>Time</th><th>Ref Gluc</th><th>Predicted</th><th>Error</th><th>HR</th><th>BP</th><th>Windows</th><th>Status</th></tr>
+    <tr>
+        <td>Batch 2</td><td>IR</td><td>01_01_2026</td><td>10_51</td>
+        <td>179</td><td>133.2</td>
+        <td class="bad">-45.8</td>
+        <td>117</td><td>126/89</td>
+        <td>3</td><td class="good">OK</td>
+    </tr>
+    <tr style="opacity:0.6;">
+        <td>Batch 2</td><td>IR</td><td>01_01_2026</td><td>14_48</td>
+        <td>132</td><td>&mdash;</td><td>&mdash;</td>
+        <td>112</td><td>155/111</td><td>&mdash;</td><td class="bad">FAILED</td>
+    </tr>
+    <tr>
+        <td>Batch 2</td><td>IR</td><td>31_12_2025</td><td>11_49</td>
+        <td>102</td><td>209.9</td>
+        <td class="bad">+107.9</td>
+        <td>104</td><td>143/104</td>
+        <td>19</td><td class="good">OK</td>
+    </tr>
+    <tr>
+        <td>Batch 2</td><td>Red</td><td>01_01_2026</td><td>10_51</td>
+        <td>179</td><td>149.4</td>
+        <td class="warn">-29.6</td>
+        <td>117</td><td>126/89</td>
+        <td>5</td><td class="good">OK</td>
+    </tr>
+    <tr style="opacity:0.6;">
+        <td>Batch 2</td><td>Red</td><td>01_01_2026</td><td>14_48</td>
+        <td>132</td><td>&mdash;</td><td>&mdash;</td>
+        <td>112</td><td>155/111</td><td>&mdash;</td><td class="bad">FAILED</td>
+    </tr>
+    <tr>
+        <td>Batch 2</td><td>Red</td><td>31_12_2025</td><td>11_49</td>
+        <td>102</td><td>231.5</td>
+        <td class="bad">+129.5</td>
+        <td>104</td><td>143/104</td>
+        <td>25</td><td class="good">OK</td>
+    </tr></table>
+<h2>5. Best Performer: Pramod &mdash; Context</h2>
+
+<div class="insight-box">
+    <h3>The "Perfect" Reading is Likely Coincidental</h3>
+    <p>Pramod's single best reading (error = -0.1 mg/dL) came from only
+    <b>2 accepted windows</b> with the <b>lowest similarity (0.743)</b>
+    in the dataset. Most windows were rejected. The two surviving windows happened to average near the true value.
+    Meanwhile, the <b>same person, same timestamp, on IR PPG</b> gives a much larger error &mdash; confirming this is
+    statistical coincidence rather than genuine model accuracy.</p>
+</div>
+
+<h3>All Pramod Readings</h3>
+<table>
+    <tr><th>Batch</th><th>PPG</th><th>Date</th><th>Time</th><th>Ref Gluc</th><th>Predicted</th><th>Error</th><th>HR</th><th>BP</th><th>Windows</th><th>Status</th></tr>
+    <tr>
+        <td>Batch 2</td><td>IR</td><td>01_01_2026</td><td>11_47</td>
+        <td>138</td><td>213.6</td>
+        <td class="bad">+75.6</td>
+        <td>94</td><td>118/79</td>
+        <td>2</td><td class="good">OK</td>
+    </tr>
+    <tr>
+        <td>Batch 2</td><td>IR</td><td>01_01_2026</td><td>16_07</td>
+        <td>147</td><td>132.7</td>
+        <td class="good">-14.3</td>
+        <td>101</td><td>124/85</td>
+        <td>2</td><td class="good">OK</td>
+    </tr>
+    <tr>
+        <td>Batch 2</td><td>IR</td><td>02_01_2026</td><td>11_13</td>
+        <td>112</td><td>155.0</td>
+        <td class="bad">+43.0</td>
+        <td>86</td><td>113/76</td>
+        <td>30</td><td class="good">OK</td>
+    </tr>
+    <tr style="opacity:0.6;">
+        <td>Batch 2</td><td>IR</td><td>29_12_2025</td><td>17_24</td>
+        <td>94</td><td>&mdash;</td><td>&mdash;</td>
+        <td>77</td><td>112/82</td><td>&mdash;</td><td class="bad">FAILED</td>
+    </tr>
+    <tr>
+        <td>Batch 2</td><td>IR</td><td>30_12_2025</td><td>11_38</td>
+        <td>111</td><td>131.9</td>
+        <td class="warn">+20.9</td>
+        <td>93</td><td>120/89</td>
+        <td>29</td><td class="good">OK</td>
+    </tr>
+    <tr>
+        <td>Batch 2</td><td>IR</td><td>31_12_2025</td><td>09_29</td>
+        <td>143</td><td>119.7</td>
+        <td class="warn">-23.3</td>
+        <td>86</td><td>104/70</td>
+        <td>10</td><td class="good">OK</td>
+    </tr>
+    <tr style="opacity:0.6;">
+        <td>Batch 2</td><td>IR</td><td>31_12_2025</td><td>17_38</td>
+        <td>114</td><td>&mdash;</td><td>&mdash;</td>
+        <td>87</td><td>120/81</td><td>&mdash;</td><td class="bad">FAILED</td>
+    </tr>
+    <tr>
+        <td>Batch 2</td><td>IR</td><td>31_12_2025</td><td>19_45</td>
+        <td>115</td><td>165.3</td>
+        <td class="bad">+50.3</td>
+        <td>86</td><td>122/85</td>
+        <td>2</td><td class="good">OK</td>
+    </tr>
+    <tr>
+        <td>Batch 2</td><td>Red</td><td>01_01_2026</td><td>11_47</td>
+        <td>138</td><td>179.9</td>
+        <td class="bad">+41.9</td>
+        <td>94</td><td>118/79</td>
+        <td>4</td><td class="good">OK</td>
+    </tr>
+    <tr>
+        <td>Batch 2</td><td>Red</td><td>01_01_2026</td><td>16_07</td>
+        <td>147</td><td>119.0</td>
+        <td class="warn">-28.0</td>
+        <td>101</td><td>124/85</td>
+        <td>15</td><td class="good">OK</td>
+    </tr>
+    <tr>
+        <td>Batch 2</td><td>Red</td><td>02_01_2026</td><td>11_13</td>
+        <td>112</td><td>158.8</td>
+        <td class="bad">+46.8</td>
+        <td>86</td><td>113/76</td>
+        <td>41</td><td class="good">OK</td>
+    </tr>
+    <tr>
+        <td>Batch 2</td><td>Red</td><td>29_12_2025</td><td>17_24</td>
+        <td>94</td><td>141.0</td>
+        <td class="bad">+47.0</td>
+        <td>77</td><td>112/82</td>
+        <td>1</td><td class="good">OK</td>
+    </tr>
+    <tr>
+        <td>Batch 2</td><td>Red</td><td>30_12_2025</td><td>11_38</td>
+        <td>111</td><td>125.2</td>
+        <td class="good">+14.2</td>
+        <td>93</td><td>120/89</td>
+        <td>38</td><td class="good">OK</td>
+    </tr>
+    <tr>
+        <td>Batch 2</td><td>Red</td><td>31_12_2025</td><td>09_29</td>
+        <td>143</td><td>123.7</td>
+        <td class="good">-19.3</td>
+        <td>86</td><td>104/70</td>
+        <td>16</td><td class="good">OK</td>
+    </tr>
+    <tr>
+        <td>Batch 2</td><td>Red</td><td>31_12_2025</td><td>17_38</td>
+        <td>114</td><td>141.1</td>
+        <td class="warn">+27.1</td>
+        <td>87</td><td>120/81</td>
+        <td>2</td><td class="good">OK</td>
+    </tr>
+    <tr class="highlight-best">
+        <td>Batch 2</td><td>Red</td><td>31_12_2025</td><td>19_45</td>
+        <td>115</td><td>114.9</td>
+        <td class="good">-0.1 *</td>
+        <td>86</td><td>122/85</td>
+        <td>2</td><td class="good">OK</td>
+    </tr></table>
+
+<h2>6. Per-Person Error Ranking</h2>
+<p style="color:#94a3b8;">Persons ranked by mean absolute error. Note how MAE tracks with cardiovascular profile.</p>
+
+<div class="chart-container"><svg viewBox="0 0 700 562" xmlns="http://www.w3.org/2000/svg" style="font-family:Segoe UI,sans-serif;">
+<rect width="700" height="562" fill="#1e293b" rx="8"/>
+<text x="140" y="69" text-anchor="end" fill="#e2e8f0" font-size="12">Harsha</text>
+<rect x="150" y="50" width="37.0" height="28" fill="#22c55e" rx="4" opacity="0.8"/>
+<text x="192.04442416973268" y="69" fill="#22c55e" font-size="11" font-weight="600">9.1 (HR:68, BP:125)</text>
+<text x="140" y="103" text-anchor="end" fill="#e2e8f0" font-size="12">Anindita</text>
+<rect x="150" y="84" width="51.5" height="28" fill="#f59e0b" rx="4" opacity="0.8"/>
+<text x="206.5410674219945" y="103" fill="#f59e0b" font-size="11" font-weight="600">12.7 (HR:84, BP:133)</text>
+<text x="140" y="137" text-anchor="end" fill="#e2e8f0" font-size="12">Sudha</text>
+<rect x="150" y="118" width="59.7" height="28" fill="#22c55e" rx="4" opacity="0.8"/>
+<text x="214.74712801111207" y="137" fill="#22c55e" font-size="11" font-weight="600">14.7 (HR:75, BP:126)</text>
+<text x="140" y="171" text-anchor="end" fill="#e2e8f0" font-size="12">Ramprasad</text>
+<rect x="150" y="152" width="67.1" height="28" fill="#f59e0b" rx="4" opacity="0.8"/>
+<text x="222.12752543783975" y="171" fill="#f59e0b" font-size="11" font-weight="600">16.5 (HR:93, BP:120)</text>
+<text x="140" y="205" text-anchor="end" fill="#e2e8f0" font-size="12">Subudhi</text>
+<rect x="150" y="186" width="74.0" height="28" fill="#22c55e" rx="4" opacity="0.8"/>
+<text x="229.0340116234201" y="205" fill="#22c55e" font-size="11" font-weight="600">18.2 (HR:78, BP:122)</text>
+<text x="140" y="239" text-anchor="end" fill="#e2e8f0" font-size="12">Akshaya</text>
+<rect x="150" y="220" width="109.8" height="28" fill="#22c55e" rx="4" opacity="0.8"/>
+<text x="264.8141778213045" y="239" fill="#22c55e" font-size="11" font-weight="600">27.0 (HR:89, BP:114)</text>
+<text x="140" y="273" text-anchor="end" fill="#e2e8f0" font-size="12">Rohit</text>
+<rect x="150" y="254" width="112.8" height="28" fill="#f59e0b" rx="4" opacity="0.8"/>
+<text x="267.7882737811901" y="273" fill="#f59e0b" font-size="11" font-weight="600">27.7 (HR:89, BP:138)</text>
+<text x="140" y="307" text-anchor="end" fill="#e2e8f0" font-size="12">Pramod</text>
+<rect x="150" y="288" width="131.2" height="28" fill="#22c55e" rx="4" opacity="0.8"/>
+<text x="286.23220834866004" y="307" fill="#22c55e" font-size="11" font-weight="600">32.3 (HR:90, BP:117)</text>
+<text x="140" y="341" text-anchor="end" fill="#e2e8f0" font-size="12">Logesh</text>
+<rect x="150" y="322" width="135.1" height="28" fill="#22c55e" rx="4" opacity="0.8"/>
+<text x="290.1264159296186" y="341" fill="#22c55e" font-size="11" font-weight="600">33.2 (HR:78, BP:117)</text>
+<text x="140" y="375" text-anchor="end" fill="#e2e8f0" font-size="12">Rohan</text>
+<rect x="150" y="356" width="204.7" height="28" fill="#f59e0b" rx="4" opacity="0.8"/>
+<text x="359.6832051563282" y="375" fill="#f59e0b" font-size="11" font-weight="600">50.3 (HR:75, BP:136)</text>
+<text x="140" y="409" text-anchor="end" fill="#e2e8f0" font-size="12">Mks</text>
+<rect x="150" y="390" width="212.7" height="28" fill="#ef4444" rx="4" opacity="0.8"/>
+<text x="367.68295192092097" y="409" fill="#ef4444" font-size="11" font-weight="600">52.3 (HR:79, BP:174)</text>
+<text x="140" y="443" text-anchor="end" fill="#e2e8f0" font-size="12">Vikram</text>
+<rect x="150" y="424" width="232.1" height="28" fill="#ef4444" rx="4" opacity="0.8"/>
+<text x="387.10925847142425" y="443" fill="#ef4444" font-size="11" font-weight="600">57.1 (HR:109, BP:140)</text>
+<text x="140" y="477" text-anchor="end" fill="#e2e8f0" font-size="12">Vikraman</text>
+<rect x="150" y="458" width="318.2" height="28" fill="#ef4444" rx="4" opacity="0.8"/>
+<text x="473.1818181818182" y="477" fill="#ef4444" font-size="11" font-weight="600">78.2 (HR:110, BP:134)</text>
+<rect x="150" y="544" width="10" height="10" fill="#22c55e" rx="2"/>
+<text x="165" y="553" fill="#94a3b8" font-size="10">Normal CV</text>
+<rect x="270" y="544" width="10" height="10" fill="#f59e0b" rx="2"/>
+<text x="285" y="553" fill="#94a3b8" font-size="10">Borderline CV</text>
+<rect x="410" y="544" width="10" height="10" fill="#ef4444" rx="2"/>
+<text x="425" y="553" fill="#94a3b8" font-size="10">Elevated HR/BP</text>
+</svg></div>
+
+<table>
+    <tr><th>#</th><th>Person</th><th>Samples</th><th>MAE</th><th>MARD</th><th>Bias</th><th>Mean HR</th><th>Mean BP</th><th>Glucose Range</th></tr>
+    <tr>
+        <td>1</td><td class="left">Harsha</td><td>1</td>
+        <td class="good">9.1</td><td>7.9%</td><td>-9.1</td>
+        <td>68</td><td>125/92</td>
+        <td>115&ndash;115</td>
+    </tr>
+    <tr>
+        <td>2</td><td class="left">Anindita</td><td>2</td>
+        <td class="good">12.7</td><td>13.5%</td><td>+12.7</td>
+        <td>84</td><td>133/94</td>
+        <td>94&ndash;94</td>
+    </tr>
+    <tr>
+        <td>3</td><td class="left">Sudha</td><td>18</td>
+        <td class="good">14.7</td><td>13.8%</td><td>+11.4</td>
+        <td>75</td><td>126/85</td>
+        <td>98&ndash;134</td>
+    </tr>
+    <tr>
+        <td>4</td><td class="left">Ramprasad</td><td>4</td>
+        <td class="good">16.5</td><td>15.1%</td><td>+16.5</td>
+        <td>93</td><td>120/81</td>
+        <td>109&ndash;109</td>
+    </tr>
+    <tr>
+        <td>5</td><td class="left">Subudhi</td><td>4</td>
+        <td class="good">18.2</td><td>13.8%</td><td>+2.9</td>
+        <td>78</td><td>122/78</td>
+        <td>125&ndash;142</td>
+    </tr>
+    <tr>
+        <td>6</td><td class="left">Akshaya</td><td>17</td>
+        <td class="warn">27.0</td><td>25.7%</td><td>+25.1</td>
+        <td>89</td><td>114/83</td>
+        <td>92&ndash;151</td>
+    </tr>
+    <tr>
+        <td>7</td><td class="left">Rohit</td><td>22</td>
+        <td class="warn">27.7</td><td>25.1%</td><td>+18.9</td>
+        <td>89</td><td>138/97</td>
+        <td>92&ndash;151</td>
+    </tr>
+    <tr class="highlight-best">
+        <td>8</td><td class="left">Pramod <span class="tag tag-best">BEST</span></td><td>14</td>
+        <td class="warn">32.3</td><td>26.6%</td><td>+20.1</td>
+        <td>90</td><td>117/81</td>
+        <td>94&ndash;147</td>
+    </tr>
+    <tr>
+        <td>9</td><td class="left">Logesh</td><td>23</td>
+        <td class="warn">33.2</td><td>36.7%</td><td>+30.6</td>
+        <td>78</td><td>117/72</td>
+        <td>82&ndash;119</td>
+    </tr>
+    <tr>
+        <td>10</td><td class="left">Rohan</td><td>6</td>
+        <td class="bad">50.3</td><td>53.6%</td><td>+50.3</td>
+        <td>75</td><td>136/85</td>
+        <td>82&ndash;123</td>
+    </tr>
+    <tr>
+        <td>11</td><td class="left">Mks</td><td>10</td>
+        <td class="bad">52.3</td><td>29.2%</td><td>-50.3</td>
+        <td>79</td><td>174/108</td>
+        <td>145&ndash;219</td>
+    </tr>
+    <tr>
+        <td>12</td><td class="left">Vikram</td><td>1</td>
+        <td class="bad">57.1</td><td>68.8%</td><td>+57.1</td>
+        <td>109</td><td>140/113</td>
+        <td>83&ndash;83</td>
+    </tr>
+    <tr class="highlight-worst">
+        <td>13</td><td class="left">Vikraman <span class="tag tag-worst">WORST</span></td><td>4</td>
+        <td class="bad">78.2</td><td>68.7%</td><td>+40.5</td>
+        <td>110</td><td>134/96</td>
+        <td>102&ndash;179</td>
+    </tr></table>
+
+<h2>7. Root Cause Analysis</h2>
+
+<div class="insight-box">
+    <h3>Finding 1: Cardiovascular State is the Dominant Confound</h3>
+    <ul>
+        <li>Systolic BP correlates <b>r = +0.301</b> with absolute error &mdash; the strongest predictor</li>
+        <li>Actual glucose level correlates <b>r = +0.020</b> with error &mdash; essentially zero</li>
+        <li>The 3 worst-performing persons (Mks, Vikram, Vikraman) all have elevated HR (&gt;100) or elevated BP (&gt;140 systolic) or both</li>
+        <li>The 3 best-performing persons (Harsha, Anindita, Sudha) have normal cardiovascular profiles (HR &lt; 85, BP &lt; 135)</li>
+    </ul>
+</div>
+
+<div class="insight-box">
+    <h3>Finding 2: ICU Training Data Creates Spurious Correlations</h3>
+    <ul>
+        <li>The model was trained on <b>VitalDB surgical ICU</b> data where hemodynamic instability co-occurs with hyperglycemia</li>
+        <li>Elevated BP &rarr; increased vascular stiffness &rarr; stiffer pulse waveform &rarr; earlier, sharper reflected wave</li>
+        <li>Elevated HR &rarr; shorter diastole &rarr; compressed dicrotic notch &rarr; altered PPG morphology</li>
+        <li>The model learned: "stiff pulse waveform = high glucose" from ICU patients, but this association breaks for ambulatory subjects</li>
+    </ul>
+</div>
+
+<div class="insight-box">
+    <h3>Finding 3: Signal Quality Metrics Do NOT Predict Accuracy</h3>
+    <ul>
+        <li>The worst case has <b>better</b> signal quality: 25 accepted windows, similarity = 0.967</li>
+        <li>The best case has <b>worse</b> signal quality: only 2 accepted windows, similarity = 0.743</li>
+        <li>High window consistency means the PPG waveform is reproducible &mdash; not that the model will interpret it correctly</li>
+        <li>The model is <b>confidently and consistently wrong</b> for Vikraman: all 25 windows predict 172&ndash;287 mg/dL when actual is 102</li>
+    </ul>
+</div>
+
+<div class="insight-box">
+    <h3>Finding 4: The "Perfect" Prediction is Statistical Coincidence</h3>
+    <ul>
+        <li>Pramod's 0.1 mg/dL error comes from only 2 surviving windows that happened to average near truth</li>
+        <li>The same person's other 13 readings have MAE ranging from 0.1 to 75.6 mg/dL (mean: 32.3)</li>
+        <li>The same person, same timestamp, on IR PPG gives ~50 mg/dL error</li>
+        <li>This is <b>not genuine model accuracy</b> but rather the law of small numbers</li>
+    </ul>
+</div>
+
+<h2>8. Recommendations</h2>
+
+<div class="insight-box">
+    <h3>For Model Improvement</h3>
+    <ol style="margin-left: 20px;">
+        <li><b>Cardiovascular Normalization:</b> Add HR and BP as auxiliary inputs or condition the model on hemodynamic state to disentangle vascular from metabolic PPG features</li>
+        <li><b>Domain Adaptation:</b> Fine-tune with ambulatory PPG data rather than relying solely on ICU data, which has different hemodynamic profiles</li>
+        <li><b>Multi-Task Learning:</b> Jointly predict glucose + HR + BP so the model learns to separate these effects</li>
+        <li><b>Prediction Confidence:</b> Use prediction standard deviation as a confidence metric &mdash; flag cases where pred_std &gt; 20 as unreliable (r = +0.359 correlation with error)</li>
+        <li><b>Subject-Specific Calibration:</b> A per-subject calibration step using 1&ndash;2 reference glucose readings could dramatically reduce person-level bias</li>
+    </ol>
+</div>
+
+<div class="insight-box">
+    <h3>For Data Collection</h3>
+    <ol style="margin-left: 20px;">
+        <li><b>Record BP and HR alongside PPG</b> to enable post-hoc cardiovascular normalization</li>
+        <li><b>Collect from diverse cardiovascular profiles</b> &mdash; current data is biased toward normotensive subjects</li>
+        <li><b>Include glucose challenge tests</b> (oral glucose tolerance) where the same person has readings at 80, 120, 180+ mg/dL to separate person-level bias from glucose sensitivity</li>
+        <li><b>Multiple readings per session</b> to estimate within-session variability and identify unreliable recordings</li>
+    </ol>
+</div>
+
+<footer>
+    Generated from Batch 1 + Batch 2 results (126 samples, 13 persons)
+    | Red PPG + IR PPG | Extreme Case Analysis
+</footer>
+
+</body></html>
